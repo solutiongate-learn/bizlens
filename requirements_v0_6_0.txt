@@ -1,0 +1,22 @@
+# BizLens v0.6.0 Requirements
+# Install with: pip install -r requirements_v0_6_0.txt
+
+# Core dependencies for descriptive analytics
+polars==0.20.0              # Fast data processing (Polars, not pandas!)
+pandas==2.0.0               # For Excel/CSV reading, compatibility
+narwhals==0.8.0             # Bridge to work with both Polars & Pandas
+numpy==1.24.0               # Numerical computing
+scipy==1.10.0               # Statistical functions (Shapiro-Wilk test)
+matplotlib==3.7.0           # Plotting library
+seaborn==0.12.0             # Statistical visualizations
+
+# Optional: Jupyter for interactive notebooks
+jupyter==1.0.0
+ipywidgets==8.0.0           # Interactive widgets
+
+# Optional: For HTML export (future versions)
+jinja2==3.1.0
+
+# Optional: Testing
+pytest==7.3.0
+pytest-cov==4.1.0

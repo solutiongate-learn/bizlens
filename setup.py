@@ -12,10 +12,10 @@ long_description = (this_directory / "README_FINAL.md").read_text(encoding="utf-
 
 setup(
     name="bizlens",
-    version="2.0.0",
+    version="2.2.0",
     author="Sudhanshu Singh",
     author_email="cc9n8y8tqc@privaterelay.appleid.com",
-    description="Integrated Analytics Platform - Descriptive, Diagnostic & Predictive Analytics with Sample vs Population Distinction",
+    description="Integrated Analytics Platform — Descriptive, Diagnostic, Predictive, Prescriptive & Simulation Analytics",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/solutiongate-learn/bizlens",

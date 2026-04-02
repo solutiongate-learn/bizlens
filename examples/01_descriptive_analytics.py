@@ -1,151 +1,204 @@
 """
-BizLens — Example 01: Descriptive Analytics
-============================================
-Topics covered
---------------
-• Auto-install: works in Google Colab, VSCode, Jupyter, or plain terminal
-• describe()                      — Full stats with sample vs population
-• compare_sample_population()     — Side-by-side n-1 vs n comparison
-• BizDesc context manager         — Auto-describe any DataFrame on exit
-• tables.descriptive_comparison() — Multi-column side-by-side table
-• tables.frequency()              — Frequency distribution (numeric + categorical)
-• tables.percentile_table()       — Percentile / quantile table with z-scores
-• tables.distribution_fit()       — Which distribution best fits your data?
+BizLens v2.2.11 Example 1: Descriptive Analytics with Tables & Diagnostics
+===========================================================================
+Self-Contained: YES (auto-install, all imports, data generation)
+Environments: Colab, VSCode, Terminal, Jupyter
 
-Works with both Pandas and Polars DataFrames (narwhals under the hood).
+Demonstrates:
+- Statistical tables (frequency, percentile, summary)
+- Descriptive analytics with smart data summarization
+- Outlier detection and normality testing
+- Correlation analysis
+- Data quality assessment and profiling
+- Professional visualizations
 
-Run anywhere
-------------
-  Google Colab : paste into a code cell and run
-  VSCode       : python 01_descriptive_analytics.py
-  Jupyter      : %run 01_descriptive_analytics.py  (or paste cells)
-  Terminal     : python 01_descriptive_analytics.py
+Run anywhere:
+  Google Colab : paste into code cell
+  VSCode/Terminal : python 01_descriptive_analytics.py
+  Jupyter : %run 01_descriptive_analytics.py
 """
 
-# ── Auto-install dependencies ─────────────────────────────────────────────────
-import subprocess, sys
+# ════════════════════════════════════════════════════════════════════════════
+# STEP 1: AUTO-INSTALL & ENVIRONMENT SETUP
+# ════════════════════════════════════════════════════════════════════════════
 
-def _install(pkg):
-    subprocess.check_call([sys.executable, "-m", "pip", "install", pkg, "-q"])
+import subprocess
+import sys
 
-for pkg, name in [("bizlens", "bizlens"), ("numpy", "numpy"),
-                  ("pandas", "pandas"), ("matplotlib", "matplotlib"),
-                  ("scipy", "scipy"), ("rich", "rich")]:
-    try:
-        __import__(name)
-    except ImportError:
-        print(f"Installing {pkg}...")
-        _install(pkg)
-
-import numpy as np
-import pandas as pd
-import matplotlib
-matplotlib.use("Agg")          # Safe for Colab / headless; remove to see pop-up windows
-import matplotlib.pyplot as plt
-import bizlens as bl
-
-print(f"BizLens version: {bl.__version__}")
-
-# ── 1. Load a built-in dataset ────────────────────────────────────────────────
-print("\n" + "="*60)
-print("1. Loading built-in 'tips' dataset:")
-df = bl.load_dataset("tips", show_citation=True)
-print(f"   Shape: {df.shape}")
-print(df.head(3).to_string())
-
-# ── 2. describe() — sample vs population ────────────────────────────────────
-print("\n" + "="*60)
-print("2. Sample statistics (ddof=1, Bessel's correction):")
-sample_stats = bl.describe(df["total_bill"], calculation_level="sample",
-                            show_formula=True)
-
-print("\nPopulation statistics (ddof=0):")
-pop_stats = bl.describe(df["total_bill"], calculation_level="population",
-                         show_formula=True)
-
-# ── 3. Why n-1? Visualise the difference ────────────────────────────────────
-print("\n" + "="*60)
-print("3. Why does n-1 matter? Compare Std Dev formulas:")
-arr = df["total_bill"].values
-n = len(arr)
-std_sample = np.std(arr, ddof=1)
-std_pop    = np.std(arr, ddof=0)
-diff_pct   = (std_sample - std_pop) / std_pop * 100
-print(f"   n = {n}")
-print(f"   Population Std (ddof=0): {std_pop:.4f}")
-print(f"   Sample Std     (ddof=1): {std_sample:.4f}")
-print(f"   Difference: {diff_pct:.2f}%  ← Bessel's correction adds {diff_pct:.2f}%")
-print("   Rule of thumb: use ddof=1 unless you have the ENTIRE population.")
-
-# ── 4. compare_sample_population ────────────────────────────────────────────
-print("\n" + "="*60)
-print("4. Side-by-side comparison:")
-comparison = bl.compare_sample_population(df["total_bill"])
-
-# ── 5. BizDesc context manager ───────────────────────────────────────────────
-print("\n" + "="*60)
-print("5. BizDesc context manager (auto-describes on exit):")
-numeric_cols = ["total_bill", "tip", "size"]
-with bl.BizDesc(df[numeric_cols], calculation_level="sample") as bd:
-    df_clean = df.dropna()
-    print(f"   Rows after dropna: {len(df_clean)}")
-# Summary prints automatically on exit
-
-# ── 6. tables.descriptive_comparison ─────────────────────────────────────────
-print("\n" + "="*60)
-print("6. Multi-column descriptive comparison (sample, ddof=1):")
-comp_tbl = bl.tables.descriptive_comparison(
-    df, columns=["total_bill", "tip", "size"], calculation_level="sample"
-)
-
-# ── 7. Frequency — numeric with custom bins ───────────────────────────────────
-print("\n" + "="*60)
-print("7. Frequency distribution — total_bill (10 bins):")
-freq_num = bl.tables.frequency(df, column="total_bill", bins=10, show_plot=True)
-print(freq_num.to_string())
-
-print("\nFrequency distribution — day (categorical):")
-freq_cat = bl.tables.frequency(df, column="day", show_plot=True)
-print(freq_cat.to_string())
-
-# ── 8. Percentile table ───────────────────────────────────────────────────────
-print("\n" + "="*60)
-print("8. Percentile table with z-scores and outlier flags — total_bill:")
-pct_tbl = bl.tables.percentile_table(
-    df, column="total_bill",
-    percentiles=[1, 5, 10, 25, 50, 75, 90, 95, 99]
-)
-print(pct_tbl.to_string())
-
-# ── 9. Distribution fit ───────────────────────────────────────────────────────
-print("\n" + "="*60)
-print("9. Which distribution best fits total_bill? (ranked by AIC):")
-dist_fit = bl.tables.distribution_fit(
-    df, column="total_bill",
-    distributions=["norm", "lognorm", "gamma", "expon", "weibull_min"],
-    show_plot=True
-)
-print(f"   Best fit: {dist_fit.iloc[0]['Distribution']}  (AIC={dist_fit.iloc[0]['AIC']})")
-
-# ── 10. Multiple datasets ─────────────────────────────────────────────────────
-print("\n" + "="*60)
-print("10. Comparing stats across multiple datasets:")
-for name in ["iris", "penguins", "tips"]:
-    d = bl.load_dataset(name, show_citation=False)
-    numeric = d.select_dtypes(include="number")
-    means   = numeric.mean().round(3).to_dict()
-    print(f"   {name:10s} | {len(d)} rows | means: {means}")
-
-# ── 11. Polars support ────────────────────────────────────────────────────────
-print("\n" + "="*60)
 try:
-    import polars as pl
-    df_polars = pl.from_pandas(df)
-    print("11. Same API with Polars DataFrame:")
-    bl.describe(df_polars["total_bill"], calculation_level="sample")
-    print("   ✅ Polars supported via narwhals")
+    import bizlens as bl
 except ImportError:
-    print("11. (Polars not installed — skipping. Install with: pip install polars)")
+    print("Installing BizLens v2.2.11...")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "bizlens==2.2.11", "-q"])
+    import bizlens as bl
 
-print("\n" + "="*60)
-print("✅ Example 01 complete — Descriptive Analytics")
+# Setup matplotlib for Colab/headless
+import matplotlib
+matplotlib.use("Agg")
+
+# ════════════════════════════════════════════════════════════════════════════
+# STEP 2: IMPORTS
+# ════════════════════════════════════════════════════════════════════════════
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+print(f"\n{'='*70}")
+print(f"BizLens v{bl.__version__} — Descriptive Analytics Example")
+print(f"{'='*70}")
+
+# ════════════════════════════════════════════════════════════════════════════
+# STEP 3: GENERATE SAMPLE DATA
+# ════════════════════════════════════════════════════════════════════════════
+
+print("\n[Step 1/5] Generating sample business data...")
+
+np.random.seed(42)
+n_records = 500
+
+data = pd.DataFrame({
+    'region': np.random.choice(['North', 'South', 'East', 'West'], n_records),
+    'product': np.random.choice(['Product A', 'Product B', 'Product C', 'Product D'], n_records),
+    'revenue': np.random.gamma(shape=2, scale=5000, size=n_records),
+    'quantity': np.random.poisson(lam=10, size=n_records),
+    'customer_satisfaction': np.random.normal(loc=7.5, scale=1.5, size=n_records).clip(1, 10),
+    'days_to_delivery': np.random.exponential(scale=3, size=n_records) + 1,
+})
+
+print(f"✓ Generated {len(data)} records with {len(data.columns)} columns")
+print(f"  Columns: {', '.join(data.columns.tolist())}")
+
+# ════════════════════════════════════════════════════════════════════════════
+# STEP 4: DESCRIPTIVE ANALYTICS
+# ════════════════════════════════════════════════════════════════════════════
+
+print("\n[Step 2/5] Running descriptive analytics...")
+bl.describe(data)
+
+# ════════════════════════════════════════════════════════════════════════════
+# STEP 5: FREQUENCY TABLES
+# ════════════════════════════════════════════════════════════════════════════
+
+print("\n[Step 3/5] Creating statistical tables...")
+
+print("\n" + "─" * 70)
+print("FREQUENCY TABLE: Product Distribution")
+print("─" * 70)
+bl.tables.frequency_table(data['product'])
+
+print("\n" + "─" * 70)
+print("FREQUENCY TABLE: Regional Distribution")
+print("─" * 70)
+bl.tables.frequency_table(data['region'])
+
+# ════════════════════════════════════════════════════════════════════════════
+# STEP 6: PERCENTILE ANALYSIS
+# ════════════════════════════════════════════════════════════════════════════
+
+print("\n" + "─" * 70)
+print("PERCENTILE ANALYSIS: Revenue Distribution")
+print("─" * 70)
+bl.tables.percentile_table(data['revenue'])
+
+# ════════════════════════════════════════════════════════════════════════════
+# STEP 7: SUMMARY STATISTICS
+# ════════════════════════════════════════════════════════════════════════════
+
+print("\n" + "─" * 70)
+print("SUMMARY STATISTICS: All Numeric Columns")
+print("─" * 70)
+bl.tables.summary_statistics(data)
+
+# ════════════════════════════════════════════════════════════════════════════
+# STEP 8: DIAGNOSTIC ANALYTICS
+# ════════════════════════════════════════════════════════════════════════════
+
+print("\n[Step 4/5] Diagnostic analytics and data quality checks...")
+
+print("\n" + "─" * 70)
+print("OUTLIER DETECTION: Revenue (IQR Method)")
+print("─" * 70)
+outlier_indices, outlier_table = bl.diagnostic.detect_outliers(data['revenue'], method='iqr')
+print(outlier_table)
+
+print("\n" + "─" * 70)
+print("NORMALITY TESTS: Revenue")
+print("─" * 70)
+normality_results = bl.diagnostic.normality_test(data['revenue'])
+
+print("\n" + "─" * 70)
+print("CORRELATION ANALYSIS")
+print("─" * 70)
+numeric_cols = data.select_dtypes(include=[np.number]).columns
+numeric_data = data[numeric_cols]
+correlation_table, corr_matrix = bl.diagnostic.correlation_analysis(numeric_data)
+
+# ════════════════════════════════════════════════════════════════════════════
+# STEP 9: DATA QUALITY ASSESSMENT
+# ════════════════════════════════════════════════════════════════════════════
+
+print("\n[Step 5/5] Data quality assessment...")
+
+print("\n" + "─" * 70)
+print("DATA QUALITY PROFILE")
+print("─" * 70)
+quality_score = bl.quality.data_profile(data)
+
+# ════════════════════════════════════════════════════════════════════════════
+# STEP 10: VISUALIZATIONS
+# ════════════════════════════════════════════════════════════════════════════
+
+print("\n[Bonus] Creating visualizations...")
+
+fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+
+axes[0, 0].hist(data['revenue'], bins=30, color='steelblue', edgecolor='black', alpha=0.7)
+axes[0, 0].set_title('Revenue Distribution')
+axes[0, 0].set_xlabel('Revenue ($)')
+axes[0, 0].set_ylabel('Frequency')
+
+data['region'].value_counts().plot(kind='bar', ax=axes[0, 1], color='coral')
+axes[0, 1].set_title('Orders by Region')
+axes[0, 1].tick_params(axis='x', rotation=45)
+
+data['product'].value_counts().plot(kind='barh', ax=axes[0, 2], color='lightgreen')
+axes[0, 2].set_title('Orders by Product')
+
+axes[1, 0].scatter(data['revenue'], data['customer_satisfaction'], alpha=0.5, color='purple', s=50)
+axes[1, 0].set_title('Revenue vs Satisfaction')
+axes[1, 0].set_xlabel('Revenue ($)')
+axes[1, 0].set_ylabel('Satisfaction (1-10)')
+
+axes[1, 1].hist(data['days_to_delivery'], bins=30, color='goldenrod', edgecolor='black', alpha=0.7)
+axes[1, 1].set_title('Days to Delivery')
+axes[1, 1].set_xlabel('Days')
+
+axes[1, 2].text(0.5, 0.7, f"Quality Score", ha='center', va='center',
+                fontsize=14, fontweight='bold', transform=axes[1, 2].transAxes)
+axes[1, 2].text(0.5, 0.4, f"{quality_score['overall_score']:.1f}/100", ha='center', va='center',
+                fontsize=48, fontweight='bold', color='darkgreen', transform=axes[1, 2].transAxes)
+axes[1, 2].axis('off')
+
+plt.tight_layout()
+plt.savefig('descriptive_analytics_visualization.png', dpi=100, bbox_inches='tight')
+print("✓ Visualization saved to: descriptive_analytics_visualization.png")
+plt.close()
+
+# ════════════════════════════════════════════════════════════════════════════
+# SUMMARY
+# ════════════════════════════════════════════════════════════════════════════
+
+print("\n" + "=" * 70)
+print("✓ EXAMPLE 1 COMPLETE — Descriptive Analytics")
+print("=" * 70)
+print("\nKey Topics Covered:")
+print("  ✓ Frequency tables for categorical data")
+print("  ✓ Percentile analysis for distributions")
+print("  ✓ Summary statistics (count, mean, std, quartiles)")
+print("  ✓ Outlier detection using IQR method")
+print("  ✓ Normality testing (Shapiro-Wilk, Anderson-Darling, KS)")
+print("  ✓ Correlation analysis with heatmaps")
+print("  ✓ Data quality assessment and profiling")
+print("  ✓ Professional visualizations")
+print("\n" + "=" * 70)

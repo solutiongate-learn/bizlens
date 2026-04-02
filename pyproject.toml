@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bizlens"
-version = "2.2.10"
-description = "Educational descriptive analytics library with rich visualizations, outlier detection, normality tests, and synthetic data generation for teaching and business analysis."
+version = "2.2.11"
+description = "Educational descriptive analytics + statistical inference + process mining. Rich tables, diagnostic checks, hypothesis testing, and business process analysis for teaching and analysis."
 readme = "README_FINAL.md"
 requires-python = ">=3.9"
 license = {text = "MIT"}
@@ -35,27 +35,51 @@ classifiers = [
 ]
 
 dependencies = [
+    # Core data manipulation
     "numpy>=1.21.0",
+    "pandas>=1.5.0",
     "polars>=0.18.0",
     "narwhals>=1.0.0",
-    "pandas>=1.5.0",
+
+    # Statistical analysis (new in v2.2.11)
     "scipy>=1.9.0",
+    "statsmodels>=0.13.0",
+
+    # Visualization
     "matplotlib>=3.6.0",
     "seaborn>=0.12.0",
+    "plotly>=5.0.0",
+
+    # Machine learning (outlier detection)
+    "scikit-learn>=1.0.0",
+
+    # UI
     "rich>=13.0.0",
 ]
 
 [project.optional-dependencies]
-# Process mining support
+# Jupyter/Colab support for interactive use
+jupyter = [
+    "jupyter>=1.0.0",
+    "ipython>=7.30.0",
+    "ipykernel>=6.0.0",
+]
+
+# Additional statistical tools
+stats-advanced = [
+    "phik>=0.11.0",  # Mixed-type correlations
+]
+
+# Advanced process mining (PM4Py integration)
 process-mining = ["pm4py>=2.7.0"]
 
-# Interactive visualizations
-interactive = ["plotly>=5.0.0"]
-
-# Full installation
+# Full installation with all extras
 full = [
+    "jupyter>=1.0.0",
+    "ipython>=7.30.0",
+    "ipykernel>=6.0.0",
+    "phik>=0.11.0",
     "pm4py>=2.7.0",
-    "plotly>=5.0.0",
 ]
 
 # Development tools
@@ -64,6 +88,7 @@ dev = [
     "pytest-cov>=4.0",
     "black>=23.0",
     "flake8>=6.0",
+    "mypy>=0.990",
 ]
 
 [project.urls]

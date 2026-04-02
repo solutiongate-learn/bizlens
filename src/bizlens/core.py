@@ -1,5 +1,5 @@
 """
-BizLens v2.2.10 — Descriptive Analytics Core
+BizLens v2.2.11 — Descriptive Analytics Core
 Rich educational output + full support for process mining event logs with any extra columns.
 """
 
@@ -8,13 +8,22 @@ import numpy as np
 import pandas as pd
 import polars as pl
 import narwhals as nw
-from narwhals.selectors import numeric, categorical
 import matplotlib.pyplot as plt
 import seaborn as sns
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from datetime import datetime
+
+# Try to import narwhals selectors (fallback if not available)
+try:
+    from narwhals.selectors import numeric, categorical
+    has_narwhals_selectors = True
+except ImportError:
+    has_narwhals_selectors = False
+    # Fallback: define selector functions manually
+    numeric = None
+    categorical = None
 
 warnings.filterwarnings("ignore")
 console = Console()
@@ -24,7 +33,7 @@ console = Console()
 # ─────────────────────────────────────────────────────────────────────────────
 def describe(data, include_plots: bool = True, norm_compare: bool = False):
     """Comprehensive descriptive analytics with smart event log detection."""
-    console.print(Panel("[bold cyan]BizLens Descriptive Analytics v2.2.9[/bold cyan]", style="bold blue"))
+    console.print(Panel("[bold cyan]BizLens Descriptive Analytics v2.2.11[/bold cyan]", style="bold blue"))
 
     # Convert to Polars for consistency
     if isinstance(data, pd.DataFrame):
@@ -108,13 +117,41 @@ def describe(data, include_plots: bool = True, norm_compare: bool = False):
 
 
 def _get_numeric_columns(data):
-    df_nw = nw.from_native(data, eager_only=True)
-    return list(df_nw.select(numeric()).columns)
+    """Get numeric columns with fallback for narwhals versions."""
+    try:
+        if has_narwhals_selectors and numeric is not None:
+            df_nw = nw.from_native(data, eager_only=True)
+            return list(df_nw.select(numeric()).columns)
+    except:
+        pass
+
+    # Fallback: use pandas dtypes
+    if isinstance(data, pd.DataFrame):
+        return list(data.select_dtypes(include=[np.number]).columns)
+    elif isinstance(data, pl.DataFrame):
+        return [col for col in data.columns if data[col].dtype in [
+            pl.Int8, pl.Int16, pl.Int32, pl.Int64,
+            pl.UInt8, pl.UInt16, pl.UInt32, pl.UInt64,
+            pl.Float32, pl.Float64
+        ]]
+    return []
 
 
 def _get_categorical_columns(data):
-    df_nw = nw.from_native(data, eager_only=True)
-    return list(df_nw.select(categorical()).columns)
+    """Get categorical columns with fallback for narwhals versions."""
+    try:
+        if has_narwhals_selectors and categorical is not None:
+            df_nw = nw.from_native(data, eager_only=True)
+            return list(df_nw.select(categorical()).columns)
+    except:
+        pass
+
+    # Fallback: use pandas dtypes
+    if isinstance(data, pd.DataFrame):
+        return list(data.select_dtypes(include=['object', 'category']).columns)
+    elif isinstance(data, pl.DataFrame):
+        return [col for col in data.columns if data[col].dtype in [pl.Utf8, pl.Categorical]]
+    return []
 
 
 class BizDesc:

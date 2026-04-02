@@ -4,9 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bizlens"
-version = "2.2.1"
-description = "Integrated Analytics Platform — Descriptive, Diagnostic, Predictive, Prescriptive & Simulation Analytics"
-readme = {file = "README_FINAL.md", content-type = "text/markdown"}
+version = "2.2.4"
+description = "Integrated Analytics Platform - Descriptive, Diagnostic, and now Advanced Predictive ML with XGBoost & SHAP"
+readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.8"
 license = {text = "MIT"}
 authors = [

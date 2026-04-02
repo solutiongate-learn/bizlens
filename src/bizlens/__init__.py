@@ -1,17 +1,22 @@
 """
-BizLens v2.2.11 — Descriptive Analytics + Statistical Inference + Process Mining
+BizLens v2.2.12 — Descriptive Analytics + Statistical Inference + Process Mining
 Educational analytics package for business analysis, teaching, and data exploration.
-
-Core Features:
-- Descriptive analytics with smart event log detection
-- Statistical tables (frequency, percentile, contingency)
-- Diagnostic analytics (outliers, normality, correlations)
-- Statistical inference (confidence intervals, hypothesis tests)
-- Process mining (case metrics, variants, bottlenecks)
-- Data quality assessment
-
-For documentation: https://github.com/solutiongate-learn/bizlens
 """
+
+__version__ = "2.2.12"
+
+# Global profiling flag (used by all modules)
+ENABLE_PROFILING = False
+
+def set_profiling(enabled: bool = True):
+    """Enable/disable performance timing across all BizLens methods.
+    Call bl.set_profiling(True) to see time duration for every cell run.
+    """
+    global ENABLE_PROFILING
+    ENABLE_PROFILING = enabled
+    from rich.console import Console
+    console = Console()
+    console.print(f"[bold green]🔍 Profiling {'ENABLED' if enabled else 'DISABLED'} — time durations will now appear[/bold green]")
 
 from .core import describe, BizDesc, generate_sample_data, generate_event_log
 from .tables import tables
@@ -28,37 +33,18 @@ from .datasets import (
     generate_tech_support_event_log,
     load_event_log_from_csv,
 )
-
-__version__ = "2.2.11"
+from .deploy import deploy, packages
 
 __all__ = [
-    # Core descriptive analytics
-    "describe",
-    "BizDesc",
-
-    # Statistical tables and summaries
-    "tables",
-
-    # Diagnostic analytics and data quality
-    "diagnostic",
-
-    # Statistical inference and hypothesis testing
-    "inference",
-
-    # Process mining and event log analysis
+    "describe", "BizDesc", "set_profiling",
+    "tables", "diagnostic", "quality", "inference",
     "process_mining",
-
-    # Data quality assessment
-    "quality",
-
-    # Dataset utilities
-    "load_dataset",
-    "list_datasets",
-    "generate_sample_data",
-    "generate_event_log",
+    "load_dataset", "list_datasets",
+    "generate_sample_data", "generate_event_log",
     "generate_hr_onboarding_event_log",
     "generate_healthcare_event_log",
     "generate_manufacturing_event_log",
     "generate_tech_support_event_log",
     "load_event_log_from_csv",
+    "deploy", "packages",
 ]

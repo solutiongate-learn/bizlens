@@ -4,9 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bizlens"
-version = "2.2.11"
+version = "2.2.12"
 description = "Educational descriptive analytics + statistical inference + process mining. Rich tables, diagnostic checks, hypothesis testing, and business process analysis for teaching and analysis."
-readme = "README_FINAL.md"
+readme = "README.md"
 requires-python = ">=3.9"
 license = {text = "MIT"}
 authors = [
@@ -41,7 +41,7 @@ dependencies = [
     "polars>=0.18.0",
     "narwhals>=1.0.0",
 
-    # Statistical analysis (new in v2.2.11)
+    # Statistical analysis
     "scipy>=1.9.0",
     "statsmodels>=0.13.0",
 
@@ -67,7 +67,7 @@ jupyter = [
 
 # Additional statistical tools
 stats-advanced = [
-    "phik>=0.11.0",  # Mixed-type correlations
+    "phik>=0.11.0",
 ]
 
 # Advanced process mining (PM4Py integration)

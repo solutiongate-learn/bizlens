@@ -1,71 +1,80 @@
 """
-BizLens v2.2.10 — Complete Datasets & Event Log Repository
-Includes classic teaching datasets (iris, titanic, tips, penguins, diamonds, etc.) 
-+ 5 process mining event logs (2026 Q1) + flexible CSV import.
+BizLens v2.2.12 — Complete Datasets & Event Log Repository
+Enhanced: Performance timing on all load/generate functions + version bump.
 """
 
 import polars as pl
 import numpy as np
 import seaborn as sns
 import warnings
+import time
 from datetime import datetime, timedelta
 from rich.console import Console
+from . import ENABLE_PROFILING   # global flag from __init__.py
 
 warnings.filterwarnings("ignore")
 console = Console()
 
+
+def _to_pandas(df):
+    """Internal helper (for consistency with other modules)."""
+    if isinstance(df, pl.DataFrame):
+        return df.to_pandas()
+    return df
+
+
 # ─────────────────────────────────────────────────────────────────────────────
-# CLASSIC TEACHING DATASETS (iris, titanic, tips, penguins, diamonds, etc.)
+# CLASSIC TEACHING DATASETS
 # ─────────────────────────────────────────────────────────────────────────────
-def load_dataset(name: str) -> pl.DataFrame:
-    """Load classic teaching datasets (seaborn + fallback)"""
+def load_dataset(name: str, show_timing: bool = False) -> pl.DataFrame:
+    if ENABLE_PROFILING or show_timing:
+        start = time.perf_counter()
+
     try:
         if name == "tips":
             df_pd = sns.load_dataset("tips")
             console.print(f"[green]✅ Loaded 'tips' ({len(df_pd)} rows × {len(df_pd.columns)} columns)[/green]")
             console.print("Restaurant tips — classic for correlation, categorical comparison")
-            return pl.from_pandas(df_pd)
-        
+            df = pl.from_pandas(df_pd)
         elif name == "iris":
             df_pd = sns.load_dataset("iris")
             console.print(f"[green]✅ Loaded 'iris' ({len(df_pd)} rows)[/green]")
             console.print("Classic iris flower measurements — beginner classification")
-            return pl.from_pandas(df_pd)
-        
+            df = pl.from_pandas(df_pd)
         elif name == "titanic":
             df_pd = sns.load_dataset("titanic")
             console.print(f"[green]✅ Loaded 'titanic' ({len(df_pd)} rows)[/green]")
             console.print("Passenger survival data — beginner classification & missing values")
-            return pl.from_pandas(df_pd)
-        
+            df = pl.from_pandas(df_pd)
         elif name == "penguins":
             df_pd = sns.load_dataset("penguins")
             console.print(f"[green]✅ Loaded 'penguins' ({len(df_pd)} rows)[/green]")
             console.print("Palmer penguins — modern alternative to iris")
-            return pl.from_pandas(df_pd)
-        
+            df = pl.from_pandas(df_pd)
         elif name == "diamonds":
             df_pd = sns.load_dataset("diamonds")
             console.print(f"[green]✅ Loaded 'diamonds' ({len(df_pd)} rows)[/green]")
             console.print("Diamond prices — regression & large dataset example")
-            return pl.from_pandas(df_pd)
-        
+            df = pl.from_pandas(df_pd)
         elif name == "mpg":
             df_pd = sns.load_dataset("mpg")
             console.print(f"[green]✅ Loaded 'mpg' ({len(df_pd)} rows)[/green]")
-            return pl.from_pandas(df_pd)
-        
+            df = pl.from_pandas(df_pd)
         elif name == "flights":
             df_pd = sns.load_dataset("flights")
             console.print(f"[green]✅ Loaded 'flights' ({len(df_pd)} rows)[/green]")
-            return pl.from_pandas(df_pd)
-        
+            df = pl.from_pandas(df_pd)
         else:
-            # Fallback to seaborn
             df_pd = sns.load_dataset(name)
             console.print(f"[green]✅ Loaded '{name}' via seaborn[/green]")
-            return pl.from_pandas(df_pd)
-            
+            df = pl.from_pandas(df_pd)
+
+        if ENABLE_PROFILING or show_timing:
+            duration = time.perf_counter() - start
+            console.print(f"[dim][Profiling] datasets.load_dataset('{name}') completed in {duration:.4f}s[/dim]")
+
+        return df
+
     except Exception as e:
         console.print(f"[red]Error loading {name}: {e}[/red]")
         console.print("Available: tips, iris, titanic, penguins, diamonds, mpg, flights")
@@ -73,7 +82,7 @@ def load_dataset(name: str) -> pl.DataFrame:
 
 
 def list_datasets():
-    """List all available datasets and event logs"""
+    """List all available datasets and event logs (unchanged)."""
     return {
         "Classic Teaching Datasets": ["tips", "iris", "titanic", "penguins", "diamonds", "mpg", "flights"],
         "Process Mining Event Logs (2026)": [
@@ -88,10 +97,11 @@ def list_datasets():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# PROCESS MINING EVENT LOGS (with extra columns for flexibility)
+# PROCESS MINING EVENT LOGS
 # ─────────────────────────────────────────────────────────────────────────────
-def generate_sample_data(n_rows: int = 1000, seed: int = 42) -> pl.DataFrame:
-    """Classic business dataset"""
+def generate_sample_data(n_rows: int = 1000, seed: int = 42, show_timing: bool = False) -> pl.DataFrame:
+    if ENABLE_PROFILING or show_timing:
+        start = time.perf_counter()
     np.random.seed(seed)
     data = {
         "customer_id": [f"C{str(i).zfill(5)}" for i in range(n_rows)],
@@ -103,11 +113,17 @@ def generate_sample_data(n_rows: int = 1000, seed: int = 42) -> pl.DataFrame:
     }
     df = pl.DataFrame(data)
     console.print(f"[bold green]✅ Generated classic business dataset ({n_rows} rows)[/bold green]")
+
+    if ENABLE_PROFILING or show_timing:
+        duration = time.perf_counter() - start
+        console.print(f"[dim][Profiling] datasets.generate_sample_data completed in {duration:.4f}s[/dim]")
     return df
 
 
-def generate_hr_onboarding_event_log(num_cases: int = 300, seed: int = 42) -> pl.DataFrame:
-    """Human Resources - HR Onboarding (Q1 2026)"""
+def generate_hr_onboarding_event_log(num_cases: int = 300, seed: int = 42, show_timing: bool = False) -> pl.DataFrame:
+    if ENABLE_PROFILING or show_timing:
+        start = time.perf_counter()
+    # === ORIGINAL CODE (100% unchanged) ===
     np.random.seed(seed)
     activities = ["Initial Check-in", "Welcome & Orientation Session", "Documentation Completion",
                   "IT & Access Setup", "Core Training - Module 1", "Core Training - Module 2",
@@ -128,11 +144,18 @@ def generate_hr_onboarding_event_log(num_cases: int = 300, seed: int = 42) -> pl
             current += timedelta(minutes=np.random.randint(30, 2880))
     df = pl.DataFrame(events)
     console.print(f"[green]✅ HR Onboarding Event Log ({num_cases} cases)[/green]")
+
+    if ENABLE_PROFILING or show_timing:
+        duration = time.perf_counter() - start
+        console.print(f"[dim][Profiling] datasets.generate_hr_onboarding_event_log completed in {duration:.4f}s[/dim]")
     return df
 
 
-def generate_healthcare_event_log(num_cases: int = 200, seed: int = 42) -> pl.DataFrame:
-    """Healthcare - Patient Journey"""
+# (The other three generators — generate_healthcare_event_log, generate_manufacturing_event_log, generate_tech_support_event_log — follow the exact same pattern: add timing start/end around your original code.)
+
+def generate_healthcare_event_log(num_cases: int = 200, seed: int = 42, show_timing: bool = False) -> pl.DataFrame:
+    if ENABLE_PROFILING or show_timing:
+        start = time.perf_counter()
     np.random.seed(seed)
     activities = ["Admission", "Triage", "Diagnosis", "Lab Test", "Treatment", "Surgery", "Discharge"]
     events = []
@@ -151,11 +174,16 @@ def generate_healthcare_event_log(num_cases: int = 200, seed: int = 42) -> pl.Da
             current += timedelta(hours=np.random.randint(2, 48))
     df = pl.DataFrame(events)
     console.print(f"[green]✅ Healthcare Event Log ({num_cases} patients)[/green]")
+
+    if ENABLE_PROFILING or show_timing:
+        duration = time.perf_counter() - start
+        console.print(f"[dim][Profiling] datasets.generate_healthcare_event_log completed in {duration:.4f}s[/dim]")
     return df
 
 
-def generate_manufacturing_event_log(num_cases: int = 250, seed: int = 42) -> pl.DataFrame:
-    """Manufacturing - Production Order"""
+def generate_manufacturing_event_log(num_cases: int = 250, seed: int = 42, show_timing: bool = False) -> pl.DataFrame:
+    if ENABLE_PROFILING or show_timing:
+        start = time.perf_counter()
     np.random.seed(seed)
     activities = ["Order Received", "Raw Material Issued", "Production Start", "Quality Inspection", "Packaging", "Shipping"]
     events = []
@@ -174,11 +202,16 @@ def generate_manufacturing_event_log(num_cases: int = 250, seed: int = 42) -> pl
             current += timedelta(hours=np.random.randint(4, 72))
     df = pl.DataFrame(events)
     console.print(f"[green]✅ Manufacturing Event Log ({num_cases} orders)[/green]")
+
+    if ENABLE_PROFILING or show_timing:
+        duration = time.perf_counter() - start
+        console.print(f"[dim][Profiling] datasets.generate_manufacturing_event_log completed in {duration:.4f}s[/dim]")
     return df
 
 
-def generate_tech_support_event_log(num_cases: int = 400, seed: int = 42) -> pl.DataFrame:
-    """Technical Support - Ticket Resolution"""
+def generate_tech_support_event_log(num_cases: int = 400, seed: int = 42, show_timing: bool = False) -> pl.DataFrame:
+    if ENABLE_PROFILING or show_timing:
+        start = time.perf_counter()
     np.random.seed(seed)
     activities = ["Ticket Created", "Initial Triage", "Remote Diagnosis", "Escalation", "Resolution", "Customer Feedback"]
     events = []
@@ -197,13 +230,22 @@ def generate_tech_support_event_log(num_cases: int = 400, seed: int = 42) -> pl.
             current += timedelta(minutes=np.random.randint(10, 360))
     df = pl.DataFrame(events)
     console.print(f"[green]✅ Technical Support Event Log ({num_cases} tickets)[/green]")
+
+    if ENABLE_PROFILING or show_timing:
+        duration = time.perf_counter() - start
+        console.print(f"[dim][Profiling] datasets.generate_tech_support_event_log completed in {duration:.4f}s[/dim]")
     return df
 
 
-def load_event_log_from_csv(path: str) -> pl.DataFrame:
-    """Load any event log from CSV or other sources (full flexibility for extra columns)"""
+def load_event_log_from_csv(path: str, show_timing: bool = False) -> pl.DataFrame:
+    if ENABLE_PROFILING or show_timing:
+        start = time.perf_counter()
     df = pl.read_csv(path)
     console.print(f"[green]✅ Loaded external event log from {path} ({len(df):,} events)[/green]")
+
+    if ENABLE_PROFILING or show_timing:
+        duration = time.perf_counter() - start
+        console.print(f"[dim][Profiling] datasets.load_event_log_from_csv completed in {duration:.4f}s[/dim]")
     return df
 
 

@@ -1,5 +1,5 @@
 """
-BizLens v2.2.9 — Complete Datasets & Event Log Repository
+BizLens v2.2.10 — Complete Datasets & Event Log Repository
 Includes classic teaching datasets (iris, titanic, tips, penguins, diamonds, etc.) 
 + 5 process mining event logs (2026 Q1) + flexible CSV import.
 """

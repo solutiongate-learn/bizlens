@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bizlens"
-version = "2.2.9"
+version = "2.2.10"
 description = "Educational descriptive analytics library with rich visualizations, outlier detection, normality tests, and synthetic data generation for teaching and business analysis."
 readme = "README_FINAL.md"
 requires-python = ">=3.9"

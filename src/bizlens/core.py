@@ -1,5 +1,5 @@
 """
-BizLens v2.2.9 — Descriptive Analytics Core
+BizLens v2.2.10 — Descriptive Analytics Core
 Rich educational output + full support for process mining event logs with any extra columns.
 """
 

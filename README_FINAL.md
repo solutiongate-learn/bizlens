@@ -1,15 +1,10 @@
 # BizLens 📊
 
-**Educational Descriptive Analytics Library**
+**Fast descriptive analytics for business + real process mining event logs**
 
-BizLens helps students, teachers, and business analysts perform rich descriptive analytics with beautiful visualizations, educational interpretations, outlier detection, normality tests, and realistic synthetic data generation.
+BizLens is a Python library designed for business analysts, teachers, and students. It provides rich educational descriptive statistics and beautiful visualizations, with special support for process mining event logs.
 
-**Current Focus (v2.2.8):**  
-Strong descriptive analytics + synthetic data for teaching.
-
----
-
-## Quick Start
+### Installation
 
 ```bash
-pip install bizlens
+pip install bizlens==2.2.10

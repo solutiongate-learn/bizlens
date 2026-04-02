@@ -1,5 +1,5 @@
 """
-BizLens v2.2.8 — Educational Descriptive Analytics Library
+BizLens v2.2.9 — Educational Descriptive Analytics Library
 Focused on rich tables, visualizations, synthetic data generation, and teaching support.
 """
 

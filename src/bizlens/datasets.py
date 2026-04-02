@@ -1,160 +1,226 @@
 """
-BizLens v2.2.8 — Built-in Sample Datasets with Citations
+BizLens v2.2.9 — Complete Datasets & Event Log Repository
+Includes classic teaching datasets (iris, titanic, tips, penguins, diamonds, etc.) 
++ 5 process mining event logs (2026 Q1) + flexible CSV import.
 """
 
-import warnings
 import polars as pl
+import numpy as np
+import seaborn as sns
+import warnings
+from datetime import datetime, timedelta
 from rich.console import Console
-from rich.table import Table
 
 warnings.filterwarnings("ignore")
 console = Console()
 
-# Complete Registry of Classic Teaching Datasets
-DATASET_REGISTRY = {
-    "tips": {
-        "source": "seaborn",
-        "loader_key": "tips",
-        "description": "Restaurant tips dataset — 244 observations",
-        "rows": 244,
-        "cols": 7,
-        "level": "Beginner",
-        "concepts": ["correlation", "categorical analysis", "regression"],
-        "citation_apa": "Bryant, P.G. & Smith, M.A. (1995). Practical Data Analysis: Case Studies in Business Statistics. Irwin.",
-    },
-    "iris": {
-        "source": "seaborn",
-        "loader_key": "iris",
-        "description": "Iris flower dataset — 150 samples, 3 species",
-        "rows": 150,
-        "cols": 5,
-        "level": "Beginner",
-        "concepts": ["classification", "multivariate analysis", "clustering"],
-        "citation_apa": "Fisher, R.A. (1936). The use of multiple measurements in taxonomic problems. Annals of Eugenics, 7(2), 179–188.",
-    },
-    "titanic": {
-        "source": "seaborn",
-        "loader_key": "titanic",
-        "description": "Titanic survival data — 891 passengers",
-        "rows": 891,
-        "cols": 15,
-        "level": "Beginner-Intermediate",
-        "concepts": ["missing values", "categorical analysis", "survival prediction"],
-        "citation_apa": "Titanic Dataset from Seaborn library.",
-    },
-    "penguins": {
-        "source": "seaborn",
-        "loader_key": "penguins",
-        "description": "Palmer Penguins dataset — 344 observations",
-        "rows": 344,
-        "cols": 7,
-        "level": "Beginner-Intermediate",
-        "concepts": ["species comparison", "outlier detection"],
-        "citation_apa": "Horst, A.M., Hill, A.P., & Gorman, K.B. (2020). palmerpenguins R package.",
-    },
-    "diamonds": {
-        "source": "seaborn",
-        "loader_key": "diamonds",
-        "description": "Diamonds price and attributes — 53,940 records",
-        "rows": 53940,
-        "cols": 10,
-        "level": "Intermediate",
-        "concepts": ["regression", "price prediction", "large dataset"],
-        "citation_apa": "ggplot2 diamonds dataset.",
-    },
-    "mpg": {
-        "source": "seaborn",
-        "loader_key": "mpg",
-        "description": "Auto MPG dataset — fuel efficiency of cars",
-        "rows": 398,
-        "cols": 9,
-        "level": "Intermediate",
-        "concepts": ["multiple regression", "feature selection", "outliers"],
-        "citation_apa": "Quinlan, J.R. (1993). Combining instance-based and model-based learning.",
-    },
-    "flights": {
-        "source": "seaborn",
-        "loader_key": "flights",
-        "description": "NYC flights data — time series example",
-        "rows": 336776,
-        "cols": 4,
-        "level": "Intermediate",
-        "concepts": ["time series", "grouping", "trend analysis"],
-        "citation_apa": "Seaborn flights dataset.",
-    },
-    "wine_quality": {
-        "source": "sklearn",
-        "loader_key": "wine",
-        "description": "Wine quality classification dataset",
-        "rows": 178,
-        "cols": 14,
-        "level": "Intermediate-Advanced",
-        "concepts": ["classification", "feature importance"],
-        "citation_apa": "Aeberhard, S., Coomans, D., & De Vel, O. (1992). Comparison of classifiers.",
-    },
-    "breast_cancer": {
-        "source": "sklearn",
-        "loader_key": "breast_cancer",
-        "description": "Breast cancer Wisconsin diagnostic dataset",
-        "rows": 569,
-        "cols": 31,
-        "level": "Advanced",
-        "concepts": ["binary classification", "medical diagnostics"],
-        "citation_apa": "Wolberg, W.H., Street, W.N., & Mangasarian, O.L. (1995).",
-    },
-}
+# ─────────────────────────────────────────────────────────────────────────────
+# CLASSIC TEACHING DATASETS (iris, titanic, tips, penguins, diamonds, etc.)
+# ─────────────────────────────────────────────────────────────────────────────
+def load_dataset(name: str) -> pl.DataFrame:
+    """Load classic teaching datasets (seaborn + fallback)"""
+    try:
+        if name == "tips":
+            df_pd = sns.load_dataset("tips")
+            console.print(f"[green]✅ Loaded 'tips' ({len(df_pd)} rows × {len(df_pd.columns)} columns)[/green]")
+            console.print("Restaurant tips — classic for correlation, categorical comparison")
+            return pl.from_pandas(df_pd)
+        
+        elif name == "iris":
+            df_pd = sns.load_dataset("iris")
+            console.print(f"[green]✅ Loaded 'iris' ({len(df_pd)} rows)[/green]")
+            console.print("Classic iris flower measurements — beginner classification")
+            return pl.from_pandas(df_pd)
+        
+        elif name == "titanic":
+            df_pd = sns.load_dataset("titanic")
+            console.print(f"[green]✅ Loaded 'titanic' ({len(df_pd)} rows)[/green]")
+            console.print("Passenger survival data — beginner classification & missing values")
+            return pl.from_pandas(df_pd)
+        
+        elif name == "penguins":
+            df_pd = sns.load_dataset("penguins")
+            console.print(f"[green]✅ Loaded 'penguins' ({len(df_pd)} rows)[/green]")
+            console.print("Palmer penguins — modern alternative to iris")
+            return pl.from_pandas(df_pd)
+        
+        elif name == "diamonds":
+            df_pd = sns.load_dataset("diamonds")
+            console.print(f"[green]✅ Loaded 'diamonds' ({len(df_pd)} rows)[/green]")
+            console.print("Diamond prices — regression & large dataset example")
+            return pl.from_pandas(df_pd)
+        
+        elif name == "mpg":
+            df_pd = sns.load_dataset("mpg")
+            console.print(f"[green]✅ Loaded 'mpg' ({len(df_pd)} rows)[/green]")
+            return pl.from_pandas(df_pd)
+        
+        elif name == "flights":
+            df_pd = sns.load_dataset("flights")
+            console.print(f"[green]✅ Loaded 'flights' ({len(df_pd)} rows)[/green]")
+            return pl.from_pandas(df_pd)
+        
+        else:
+            # Fallback to seaborn
+            df_pd = sns.load_dataset(name)
+            console.print(f"[green]✅ Loaded '{name}' via seaborn[/green]")
+            return pl.from_pandas(df_pd)
+            
+    except Exception as e:
+        console.print(f"[red]Error loading {name}: {e}[/red]")
+        console.print("Available: tips, iris, titanic, penguins, diamonds, mpg, flights")
+        raise
+
 
 def list_datasets():
-    """List all available built-in datasets."""
-    rows = []
-    for name, info in DATASET_REGISTRY.items():
-        rows.append({
-            "Name": name,
-            "Rows": info["rows"],
-            "Cols": info["cols"],
-            "Level": info["level"],
-            "Key Concepts": ", ".join(info["concepts"][:3]),
-        })
-    table = Table(title="📦 BizLens Built-in Datasets")
-    for col in ["Name", "Rows", "Cols", "Level", "Key Concepts"]:
-        table.add_column(col, style="cyan" if col == "Name" else "white")
-    for row in rows:
-        table.add_row(*[str(v) for v in row.values()])
-    console.print(table)
-    return [name for name in DATASET_REGISTRY.keys()]
+    """List all available datasets and event logs"""
+    return {
+        "Classic Teaching Datasets": ["tips", "iris", "titanic", "penguins", "diamonds", "mpg", "flights"],
+        "Process Mining Event Logs (2026)": [
+            "generate_hr_onboarding_event_log()",
+            "generate_healthcare_event_log()",
+            "generate_manufacturing_event_log()",
+            "generate_tech_support_event_log()"
+        ],
+        "Business": "generate_sample_data()",
+        "Custom": "load_event_log_from_csv('your_file.csv')"
+    }
 
 
-def dataset_info(name: str):
-    """Show detailed information and citation for a dataset."""
-    name = name.lower().strip()
-    if name not in DATASET_REGISTRY:
-        raise ValueError(f"Dataset '{name}' not found. Available: {list_datasets()}")
-    
-    info = DATASET_REGISTRY[name]
-    console.print(f"\n[bold]📋 Dataset: {name.upper()}[/bold]")
-    console.print(f"Description: {info['description']}")
-    console.print(f"Size: {info['rows']} rows × {info['cols']} columns")
-    console.print(f"Level: {info['level']}")
-    console.print(f"Key Concepts: {', '.join(info['concepts'])}")
-    console.print(f"\n[bold yellow]Citation (APA):[/bold yellow]\n {info['citation_apa']}")
-    return info
-
-
-def load_dataset(name: str, show_citation: bool = True) -> pl.DataFrame:
-    """Load a built-in dataset."""
-    name = name.lower().strip()
-    if name not in DATASET_REGISTRY:
-        raise ValueError(f"Dataset '{name}' not found. Available: {list_datasets()}")
-    
-    info = DATASET_REGISTRY[name]
-    import seaborn as sns
-    df_pd = sns.load_dataset(info["loader_key"])
-    df = pl.from_pandas(df_pd)
-
-    if show_citation:
-        console.print(f"[bold green]✅ Loaded '{name}'[/bold green] ({info['rows']} rows × {info['cols']} columns)")
-        console.print(f"[dim]{info['description']}[/dim]")
-        console.print(f"[bold yellow]📚 Citation (APA):[/bold yellow] {info['citation_apa']}")
-        console.print(f"[dim]Level: {info['level']} | Concepts: {', '.join(info['concepts'])}[/dim]")
-
+# ─────────────────────────────────────────────────────────────────────────────
+# PROCESS MINING EVENT LOGS (with extra columns for flexibility)
+# ─────────────────────────────────────────────────────────────────────────────
+def generate_sample_data(n_rows: int = 1000, seed: int = 42) -> pl.DataFrame:
+    """Classic business dataset"""
+    np.random.seed(seed)
+    data = {
+        "customer_id": [f"C{str(i).zfill(5)}" for i in range(n_rows)],
+        "revenue": np.random.lognormal(mean=8, sigma=1.2, size=n_rows).round(2),
+        "profit_margin": (np.random.beta(2, 5, size=n_rows) * 100).round(2),
+        "customer_satisfaction": np.clip(np.random.normal(75, 12, size=n_rows), 0, 100).round(1),
+        "units_sold": np.random.poisson(lam=45, size=n_rows),
+        "region": np.random.choice(["North", "South", "East", "West"], size=n_rows),
+    }
+    df = pl.DataFrame(data)
+    console.print(f"[bold green]✅ Generated classic business dataset ({n_rows} rows)[/bold green]")
     return df
+
+
+def generate_hr_onboarding_event_log(num_cases: int = 300, seed: int = 42) -> pl.DataFrame:
+    """Human Resources - HR Onboarding (Q1 2026)"""
+    np.random.seed(seed)
+    activities = ["Initial Check-in", "Welcome & Orientation Session", "Documentation Completion",
+                  "IT & Access Setup", "Core Training - Module 1", "Core Training - Module 2",
+                  "Welcome Package Delivery", "Feedback & Review Session"]
+    events = []
+    start = datetime(2026, 1, 1)
+    for case in range(1, num_cases + 1):
+        current = start + timedelta(days=np.random.randint(0, 85))
+        for act in np.random.choice(activities, np.random.randint(5, 9), replace=False):
+            events.append({
+                "case_id": f"EMP{str(case).zfill(5)}",
+                "activity": act,
+                "timestamp": current,
+                "cost": round(np.random.uniform(50, 500), 2),
+                "co2_impact": round(np.random.uniform(0.05, 2.5), 2),
+                "resource": np.random.choice(["Alice", "Bob", "Charlie", "Diana"])
+            })
+            current += timedelta(minutes=np.random.randint(30, 2880))
+    df = pl.DataFrame(events)
+    console.print(f"[green]✅ HR Onboarding Event Log ({num_cases} cases)[/green]")
+    return df
+
+
+def generate_healthcare_event_log(num_cases: int = 200, seed: int = 42) -> pl.DataFrame:
+    """Healthcare - Patient Journey"""
+    np.random.seed(seed)
+    activities = ["Admission", "Triage", "Diagnosis", "Lab Test", "Treatment", "Surgery", "Discharge"]
+    events = []
+    start = datetime(2026, 1, 1)
+    for case in range(1, num_cases + 1):
+        current = start + timedelta(days=np.random.randint(0, 60))
+        for act in np.random.choice(activities, np.random.randint(4, 7), replace=False):
+            events.append({
+                "case_id": f"PAT{str(case).zfill(5)}",
+                "activity": act,
+                "timestamp": current,
+                "cost": round(np.random.uniform(200, 5000), 2),
+                "length_of_stay_hours": np.random.randint(4, 240),
+                "resource": np.random.choice(["Dr.Smith", "Nurse.Jones", "Dr.Lee"])
+            })
+            current += timedelta(hours=np.random.randint(2, 48))
+    df = pl.DataFrame(events)
+    console.print(f"[green]✅ Healthcare Event Log ({num_cases} patients)[/green]")
+    return df
+
+
+def generate_manufacturing_event_log(num_cases: int = 250, seed: int = 42) -> pl.DataFrame:
+    """Manufacturing - Production Order"""
+    np.random.seed(seed)
+    activities = ["Order Received", "Raw Material Issued", "Production Start", "Quality Inspection", "Packaging", "Shipping"]
+    events = []
+    start = datetime(2026, 1, 1)
+    for case in range(1, num_cases + 1):
+        current = start + timedelta(days=np.random.randint(0, 70))
+        for act in activities:
+            events.append({
+                "case_id": f"ORD{str(case).zfill(5)}",
+                "activity": act,
+                "timestamp": current,
+                "cost": round(np.random.uniform(300, 8000), 2),
+                "defect_rate": round(np.random.uniform(0, 5), 2),
+                "resource": np.random.choice(["LineA", "LineB", "LineC"])
+            })
+            current += timedelta(hours=np.random.randint(4, 72))
+    df = pl.DataFrame(events)
+    console.print(f"[green]✅ Manufacturing Event Log ({num_cases} orders)[/green]")
+    return df
+
+
+def generate_tech_support_event_log(num_cases: int = 400, seed: int = 42) -> pl.DataFrame:
+    """Technical Support - Ticket Resolution"""
+    np.random.seed(seed)
+    activities = ["Ticket Created", "Initial Triage", "Remote Diagnosis", "Escalation", "Resolution", "Customer Feedback"]
+    events = []
+    start = datetime(2026, 1, 1)
+    for case in range(1, num_cases + 1):
+        current = start + timedelta(days=np.random.randint(0, 90))
+        for act in activities:
+            events.append({
+                "case_id": f"TKT{str(case).zfill(5)}",
+                "activity": act,
+                "timestamp": current,
+                "resolution_time_minutes": np.random.randint(15, 480),
+                "satisfaction_score": np.random.randint(1, 6),
+                "resource": np.random.choice(["Agent1", "Agent2", "SeniorTech"])
+            })
+            current += timedelta(minutes=np.random.randint(10, 360))
+    df = pl.DataFrame(events)
+    console.print(f"[green]✅ Technical Support Event Log ({num_cases} tickets)[/green]")
+    return df
+
+
+def load_event_log_from_csv(path: str) -> pl.DataFrame:
+    """Load any event log from CSV or other sources (full flexibility for extra columns)"""
+    df = pl.read_csv(path)
+    console.print(f"[green]✅ Loaded external event log from {path} ({len(df):,} events)[/green]")
+    return df
+
+
+def list_datasets():
+    return {
+        "Classic": ["tips", "iris", "titanic", "penguins", "diamonds", "mpg", "flights"],
+        "Event Logs": ["hr_onboarding", "healthcare", "manufacturing", "tech_support"],
+        "Business": "generate_sample_data()"
+    }
+
+
+__all__ = [
+    "load_dataset", "list_datasets",
+    "generate_sample_data",
+    "generate_hr_onboarding_event_log",
+    "generate_healthcare_event_log",
+    "generate_manufacturing_event_log",
+    "generate_tech_support_event_log",
+    "load_event_log_from_csv"
+]

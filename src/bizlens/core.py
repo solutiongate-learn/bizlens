@@ -1,6 +1,6 @@
 """
-BizLens v2.2.8 — Descriptive Analytics Core
-Focused on rich educational output for teaching and business analysis.
+BizLens v2.2.9 — Descriptive Analytics Core
+Rich educational output + full support for process mining event logs with any extra columns.
 """
 
 import warnings
@@ -9,135 +9,101 @@ import pandas as pd
 import polars as pl
 import narwhals as nw
 from narwhals.selectors import numeric, categorical
-import scipy.stats as stats
 import matplotlib.pyplot as plt
 import seaborn as sns
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
-from datetime import datetime, timedelta
+from datetime import datetime
 
 warnings.filterwarnings("ignore")
 console = Console()
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SYNTHETIC DATA GENERATORS
-# ─────────────────────────────────────────────────────────────────────────────
-def generate_sample_data(n_rows: int = 1000, seed: int = 42) -> pl.DataFrame:
-    """Generate realistic business data for teaching."""
-    np.random.seed(seed)
-    data = {
-        "customer_id": [f"C{str(i).zfill(5)}" for i in range(n_rows)],
-        "revenue": np.random.lognormal(mean=8, sigma=1.2, size=n_rows).round(2),
-        "profit_margin": (np.random.beta(2, 5, size=n_rows) * 100).round(2),
-        "customer_satisfaction": np.clip(np.random.normal(75, 12, size=n_rows), 0, 100).round(1),
-        "units_sold": np.random.poisson(lam=45, size=n_rows),
-        "region": np.random.choice(["North", "South", "East", "West"], size=n_rows),
-    }
-    df = pl.DataFrame(data)
-    console.print(f"[bold green]✅ Generated business dataset ({n_rows} rows)[/bold green]")
-    return df
-
-
-def generate_event_log(num_cases: int = 500, seed: int = 42) -> pl.DataFrame:
-    """Generate realistic event log for process mining introduction."""
-    np.random.seed(seed)
-    activities = ["Order Placed", "Payment Received", "Processing", "Quality Check", "Shipped", "Delivered"]
-    events = []
-    start_date = datetime(2025, 1, 1)
-
-    for case_id in range(1, num_cases + 1):
-        num_events = np.random.randint(3, len(activities) + 1)
-        case_activities = np.random.choice(activities, num_events, replace=False)
-        current_time = start_date + timedelta(days=np.random.randint(0, 90))
-
-        for i, activity in enumerate(case_activities):
-            timestamp = current_time + timedelta(minutes=np.random.randint(30, 1440))
-            resource = np.random.choice(["Alice", "Bob", "Charlie", "Diana"])
-            cost = round(np.random.uniform(10, 250), 2)
-            status = "Completed" if i == len(case_activities)-1 else "In Progress"
-
-            events.append({
-                "case_id": f"CASE-{str(case_id).zfill(5)}",
-                "activity": activity,
-                "timestamp": timestamp,
-                "resource": resource,
-                "cost": cost,
-                "status": status
-            })
-            current_time = timestamp
-
-    df = pl.DataFrame(events)
-    console.print(f"[bold green]✅ Generated Process Mining Event Log ({num_cases} cases)[/bold green]")
-    return df
-
-
-# ─────────────────────────────────────────────────────────────────────────────
 # MAIN DESCRIBE FUNCTION
 # ─────────────────────────────────────────────────────────────────────────────
 def describe(data, include_plots: bool = True, norm_compare: bool = False):
-    """Rich descriptive analysis with educational insights."""
-    console.print(Panel("[bold cyan]BizLens Descriptive Analytics v2.2.8[/bold cyan]", style="bold blue"))
+    """Comprehensive descriptive analytics with smart event log detection."""
+    console.print(Panel("[bold cyan]BizLens Descriptive Analytics v2.2.9[/bold cyan]", style="bold blue"))
 
+    # Convert to Polars for consistency
     if isinstance(data, pd.DataFrame):
         df = pl.from_pandas(data)
     elif isinstance(data, pl.DataFrame):
         df = data
     else:
-        console.print("Single column support coming soon.")
+        console.print("[red]Error: Please provide a pandas or polars DataFrame.[/red]")
         return None
+
+    # Flexible Event Log Detection
+    col_lower = {c.lower(): c for c in df.columns}
+    is_event_log = False
+    case_col = activity_col = ts_col = None
+
+    for key in ["case_id", "employee_id", "case"]:
+        if key in col_lower:
+            case_col = col_lower[key]
+            break
+    for key in ["activity"]:
+        if key in col_lower:
+            activity_col = col_lower[key]
+            break
+    for key in ["timestamp", "time", "date"]:
+        if key in col_lower:
+            ts_col = col_lower[key]
+            break
+
+    if case_col and activity_col and ts_col:
+        is_event_log = True
 
     numeric_cols = _get_numeric_columns(df)
     categorical_cols = _get_categorical_columns(df)
 
-    console.print(f"[bold green]Numeric Columns ({len(numeric_cols)}):[/] {numeric_cols}")
-    console.print(f"[bold yellow]Categorical Columns ({len(categorical_cols)}):[/] {categorical_cols}\n")
+    console.print(f"[bold green]Numeric Columns ({len(numeric_cols)}):[/bold green] {numeric_cols}")
+    console.print(f"[bold yellow]Categorical Columns ({len(categorical_cols)}):[/bold yellow] {categorical_cols}\n")
 
+    if is_event_log:
+        console.print(Panel("[bold magenta]Process Mining Event Log Detected[/bold magenta]", style="magenta"))
+        num_cases = df[case_col].n_unique() if case_col else 0
+        unique_acts = df[activity_col].n_unique() if activity_col else 0
+        total_events = len(df)
+        time_span = f"{df[ts_col].min()} → {df[ts_col].max()}" if ts_col else "N/A"
+
+        console.print(f"• Cases: {num_cases:,} | Unique Activities: {unique_acts}")
+        console.print(f"• Total Events: {total_events:,} | Time Span: {time_span}")
+
+        # Show summary of extra numeric attributes (cost, co2_impact, etc.)
+        extra_numeric = [c for c in numeric_cols if c.lower() not in [case_col.lower(), ts_col.lower() if ts_col else ""]]
+        if extra_numeric:
+            console.print(f"• Extra Numeric Attributes: {extra_numeric}")
+
+    # Detailed numeric analysis for all numeric columns (including extra ones)
     for col in numeric_cols:
         console.print(f"\n[bold]Column: {col}[/bold]")
-        arr = np.array(df[col].to_list())
+        arr = np.array(df[col].to_list(), dtype=float)
         arr = arr[~np.isnan(arr)]
         n = len(arr)
-        mean_val = arr.mean()
-        median_val = np.median(arr)
-        std_val = arr.std()
-        skew_val = stats.skew(arr)
-
-        # Outlier detection
-        q1, q3 = np.percentile(arr, [25, 75])
-        iqr = q3 - q1
-        lower, upper = q1 - 1.5 * iqr, q3 + 1.5 * iqr
-        outliers = arr[(arr < lower) | (arr > upper)]
-        outlier_pct = len(outliers) / n * 100 if n > 0 else 0
-
-        # Normality test
-        shapiro_p = stats.shapiro(arr[:5000] if n > 5000 else arr)[1]
 
         table = Table(title=col)
         table.add_column("Metric", style="cyan")
-        table.add_column("Value", style="green", justify="right")
-        table.add_column("Interpretation", style="dim")
-        rows = [
-            ("Count", str(n), ""),
-            ("Mean", f"{mean_val:.2f}", ""),
-            ("Median", f"{median_val:.2f}", "Robust to outliers"),
-            ("Std Dev", f"{std_val:.2f}", ""),
-            ("Skewness", f"{skew_val:.2f}", "Right-skewed" if skew_val > 0.5 else "Left-skewed" if skew_val < -0.5 else "Symmetric"),
-            ("Outliers (IQR)", f"{len(outliers)} ({outlier_pct:.1f}%)", "Potential anomalies"),
-            ("Shapiro p-value", f"{shapiro_p:.4f}", "Normal" if shapiro_p > 0.05 else "Non-normal"),
-        ]
-        for row in rows:
-            table.add_row(*row)
+        table.add_column("Value", style="green")
+        table.add_row("Count", f"{n:,}")
+        table.add_row("Mean", f"{arr.mean():.2f}")
+        table.add_row("Median", f"{np.median(arr):.2f}")
+        table.add_row("Std Dev", f"{arr.std():.2f}")
         console.print(table)
 
-    if include_plots:
-        for col in numeric_cols[:3]:
+    # Plots (limited to first 4 numeric columns to avoid too many plots)
+    if include_plots and numeric_cols:
+        for col in numeric_cols[:4]:
             plt.figure(figsize=(8, 4))
-            sns.histplot(df[col].to_list(), kde=True)
+            sns.histplot(df[col].to_list(), kde=True, color="skyblue")
             plt.title(f"Distribution of {col}")
+            plt.xlabel(col)
+            plt.ylabel("Frequency")
             plt.show()
 
-    console.print(Panel("[bold green]Analysis Complete — Ready for teaching and business decisions[/bold green]", style="green"))
+    console.print(Panel("[bold green]Analysis Complete — Full support for additional columns[/bold green]", style="green"))
     return "Done"
 
 
@@ -159,5 +125,14 @@ class BizDesc:
         return describe(self.data, include_plots=include_plots)
 
 
-# Export synthetic generators
-__all__ = ["describe", "BizDesc", "generate_sample_data", "generate_event_log"]
+# Keep synthetic generators here for backward compatibility
+def generate_sample_data(n_rows: int = 1000, seed: int = 42) -> pl.DataFrame:
+    """Classic business dataset (kept for compatibility)"""
+    from .datasets import generate_sample_data as ds_generate
+    return ds_generate(n_rows, seed)
+
+
+def generate_event_log(num_cases: int = 500, seed: int = 42) -> pl.DataFrame:
+    """Original event log generator (kept for compatibility)"""
+    from .datasets import generate_hr_onboarding_event_log
+    return generate_hr_onboarding_event_log(num_cases, seed)

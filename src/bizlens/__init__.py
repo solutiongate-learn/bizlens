@@ -50,7 +50,7 @@ Features:
     load_from_world_bank()            — Live World Bank data
 - Sample vs Population: Explicit n-1 vs n throughout all calculations
 
-Version: 2.2.0
+Version: 2.2.1
 Author: Sudhanshu Singh
 License: MIT
 GitHub: https://github.com/solutiongate-learn/bizlens
@@ -82,7 +82,7 @@ from .datasets import (
 
 from .deploy import deploy, packages
 
-__version__ = "2.2.0"
+__version__ = "2.2.1"
 __author__ = "Sudhanshu Singh"
 __email__ = "cc9n8y8tqc@privaterelay.appleid.com"
 __license__ = "MIT"

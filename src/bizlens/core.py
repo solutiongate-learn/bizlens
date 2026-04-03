@@ -1,5 +1,5 @@
 """
-BizLens v2.2.12 — Descriptive Analytics Core
+BizLens v2.2.14 — Descriptive Analytics Core
 Enhanced: Full pandas/polars compatibility + built-in performance profiling.
 """
 
@@ -12,6 +12,7 @@ import time
 from rich.console import Console
 from rich.panel import Panel
 from . import ENABLE_PROFILING   # global flag from __init__.py
+from . import quality             # required for describe() → quality.completeness_report()
 
 try:
     import polars as pl
@@ -41,7 +42,7 @@ def describe(data, include_plots: bool = True, show_timing: bool = False):
     if ENABLE_PROFILING or show_timing:
         start_total = time.perf_counter()
 
-    console.print(Panel("[bold cyan]BizLens Descriptive Analytics v2.2.12[/bold cyan]", style="bold blue"))
+    console.print(Panel("[bold cyan]BizLens Descriptive Analytics v2.2.14[/bold cyan]", style="bold blue"))
 
     df = _to_pandas(data)
 

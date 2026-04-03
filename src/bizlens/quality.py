@@ -1,6 +1,6 @@
 """
 BizLens Quality Module — Data Quality Assessment
-Version: 2.2.12
+Version: 2.2.14
 Enhanced: Full pandas + polars support + optional performance timing.
 """
 

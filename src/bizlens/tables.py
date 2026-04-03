@@ -1,6 +1,6 @@
 """
 BizLens Tables Module — Educational Statistical Tables & Summaries
-Version: 2.2.12
+Version: 2.2.14
 Enhanced: Full pandas + polars support + optional performance timing.
 """
 

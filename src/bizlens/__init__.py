@@ -3,7 +3,7 @@ BizLens v2.2.13 — Descriptive Analytics + Statistical Inference + Process Mini
 Educational analytics package for business analysis, teaching, and data exploration.
 """
 
-__version__ = "2.2.13"
+__version__ = "2.2.14"
 
 # Global profiling flag (used by all modules)
 ENABLE_PROFILING = False

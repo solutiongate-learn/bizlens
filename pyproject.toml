@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bizlens"
-version = "2.2.13"
+version = "2.2.14"
 description = "Educational descriptive analytics + statistical inference + process mining. Rich tables, diagnostic checks, hypothesis testing, and business process analysis for teaching and analysis."
 readme = "README.md"
 requires-python = ">=3.9"

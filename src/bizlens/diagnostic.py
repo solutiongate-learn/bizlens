@@ -1,6 +1,6 @@
 """
 BizLens Diagnostic Module — Data Quality & Statistical Diagnostics
-Version: 2.2.12
+Version: 2.2.14
 Enhanced: Full pandas + polars support + optional performance timing.
 """
 

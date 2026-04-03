@@ -1,5 +1,5 @@
 """
-BizLens v2.2.13 — Complete Datasets & Event Log Repository
+BizLens v2.2.14 — Complete Datasets & Event Log Repository
 All functions return pandas DataFrames for full compatibility.
 """
 

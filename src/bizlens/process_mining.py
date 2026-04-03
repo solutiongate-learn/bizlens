@@ -1,6 +1,6 @@
 """
 BizLens Process Mining Module — Event Log & Business Process Analysis
-Version: 2.2.12
+Version: 2.2.14
 Enhanced: Full pandas + polars support + optional performance timing.
 """
 

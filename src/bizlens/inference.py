@@ -72,8 +72,7 @@ class inference:
         table.add_row("[bold]Upper Bound[/bold]", f"{upper:.4f}")
         table.add_row("[bold]Confidence Interval[/bold]", f"[{lower:.4f}, {upper:.4f}]")
         console.print(table)
-        console.print(f"[dim]Interpretation: We are {int(confidence*100)}% confident the true population mean")
-        console.print(f"is between {lower:.4f} and {upper:.4f}[/dim]")
+        console.print(f"[dim]Interpretation: We are {int(confidence*100)}% confident the true population mean is between {lower:.4f} and {upper:.4f}[/dim]")
 
         if ENABLE_PROFILING or show_timing:
             duration = time.perf_counter() - start

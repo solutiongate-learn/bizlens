@@ -37,9 +37,12 @@ class tables:
     def frequency_table(series: pd.Series, top_n: int = 10, show_timing: bool = False) -> RichTable:
         if ENABLE_PROFILING or show_timing:
             start = time.perf_counter()
-        series = pd.Series(_to_pandas(series))
-        # === ORIGINAL CODE (100% unchanged) ===
-        data = series.dropna()
+        # Handle Series input properly
+        if isinstance(series, pd.Series):
+            data = series.dropna()
+        else:
+            series = pd.Series(_to_pandas(series).iloc[:, 0])
+            data = series.dropna()
         value_counts = data.value_counts().head(top_n)
         total = len(data)
         percentages = (value_counts / total * 100).round(2)

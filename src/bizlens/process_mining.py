@@ -21,6 +21,12 @@ except ImportError:
     HAS_PLOTLY = False
     go = None
 
+# Optional: polars support
+try:
+    import polars as pl
+except ImportError:
+    pl = None
+
 console = Console()
 
 
@@ -28,7 +34,7 @@ def _to_pandas(df):
     """Internal helper – ensures all methods receive pandas DataFrame."""
     if isinstance(df, pd.DataFrame):
         return df
-    elif isinstance(df, pl.DataFrame):   # polars support
+    elif pl and isinstance(df, pl.DataFrame):   # polars support
         return df.to_pandas()
     return df
 
@@ -48,11 +54,16 @@ class process_mining:
         event_log = _to_pandas(event_log)
         # === ORIGINAL CODE (100% unchanged) ===
         event_log[timestamp_col] = pd.to_datetime(event_log[timestamp_col])
-        case_metrics = event_log.groupby(case_id_col).agg({
-            timestamp_col: ['min', 'max', 'count'],
-            cost_col: 'sum' if cost_col else 'count'
-        }).reset_index()
-        case_metrics.columns = ['case_id', 'start_time', 'end_time', 'activity_count', 'cost']
+        agg_dict = {
+            timestamp_col: ['min', 'max', 'count']
+        }
+        if cost_col:
+            agg_dict[cost_col] = 'sum'
+        case_metrics = event_log.groupby(case_id_col).agg(agg_dict).reset_index()
+        # Flatten MultiIndex columns
+        case_metrics.columns = ['_'.join(map(str, col)).strip('_') for col in case_metrics.columns.values]
+        # Rename to standard names
+        case_metrics = case_metrics.rename(columns={f'{timestamp_col}_min': 'start_time', f'{timestamp_col}_max': 'end_time', f'{timestamp_col}_count': 'activity_count'})
         case_metrics['duration_hours'] = (
             (case_metrics['end_time'] - case_metrics['start_time']).dt.total_seconds() / 3600
         )
@@ -86,11 +97,14 @@ class process_mining:
         event_log = _to_pandas(event_log)
         # === ORIGINAL CODE (100% unchanged) ===
         event_log[timestamp_col] = pd.to_datetime(event_log[timestamp_col])
-        activity_stats = event_log.groupby(activity_col).agg({
-            activity_col: 'count',
-            cost_col: 'sum' if cost_col else activity_col
-        }).reset_index()
-        activity_stats.columns = ['activity', 'frequency', 'cost']
+        agg_dict = {
+            timestamp_col: 'count'  # Count events per activity
+        }
+        if cost_col:
+            agg_dict[cost_col] = 'sum'
+        activity_stats = event_log.groupby(activity_col).agg(agg_dict).reset_index()
+        # Rename columns - flatten any MultiIndex from agg
+        activity_stats.columns = ['activity', 'frequency'] + ([cost_col] if cost_col else [])
         activity_stats['percentage'] = (activity_stats['frequency'] / activity_stats['frequency'].sum() * 100).round(2)
         activity_stats = activity_stats.sort_values('frequency', ascending=False)
 

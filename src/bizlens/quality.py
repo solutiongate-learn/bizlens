@@ -12,6 +12,12 @@ from rich.console import Console
 from typing import Dict, Tuple, Union
 from . import ENABLE_PROFILING   # global flag from __init__.py
 
+# Optional polars support
+try:
+    import polars as pl
+except ImportError:
+    pl = None
+
 console = Console()
 
 
@@ -19,7 +25,7 @@ def _to_pandas(df):
     """Internal helper – ensures all methods receive pandas DataFrame."""
     if isinstance(df, pd.DataFrame):
         return df
-    elif isinstance(df, pl.DataFrame):   # polars support
+    elif pl and isinstance(df, pl.DataFrame):   # polars support
         return df.to_pandas()
     return df
 

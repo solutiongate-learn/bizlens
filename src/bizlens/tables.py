@@ -74,9 +74,12 @@ class tables:
     def percentile_table(series: pd.Series, show_timing: bool = False) -> RichTable:
         if ENABLE_PROFILING or show_timing:
             start = time.perf_counter()
-        series = pd.Series(_to_pandas(series))
-        # === ORIGINAL CODE (100% unchanged) ===
-        data = series.dropna()
+        # Handle Series input properly
+        if isinstance(series, pd.Series):
+            data = series.dropna()
+        else:
+            series = pd.Series(_to_pandas(series).iloc[:, 0])
+            data = series.dropna()
         percentiles = [0, 25, 50, 75, 100]
         percentile_values = np.percentile(data, percentiles)
         q1 = percentile_values[1]

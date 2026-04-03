@@ -1,9 +1,9 @@
 """
-BizLens v2.2.12 — Descriptive Analytics + Statistical Inference + Process Mining
+BizLens v2.2.13 — Descriptive Analytics + Statistical Inference + Process Mining
 Educational analytics package for business analysis, teaching, and data exploration.
 """
 
-__version__ = "2.2.12"
+__version__ = "2.2.13"
 
 # Global profiling flag (used by all modules)
 ENABLE_PROFILING = False

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bizlens"
-version = "2.2.12"
+version = "2.2.13"
 description = "Educational descriptive analytics + statistical inference + process mining. Rich tables, diagnostic checks, hypothesis testing, and business process analysis for teaching and analysis."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -38,8 +38,6 @@ dependencies = [
     # Core data manipulation
     "numpy>=1.21.0",
     "pandas>=1.5.0",
-    "polars>=0.18.0",
-    "narwhals>=1.0.0",
 
     # Statistical analysis
     "scipy>=1.9.0",

@@ -6,13 +6,17 @@ Enhanced: Full pandas/polars compatibility + built-in performance profiling.
 import warnings
 import numpy as np
 import pandas as pd
-import polars as pl
 import matplotlib.pyplot as plt
 import seaborn as sns
 import time
 from rich.console import Console
 from rich.panel import Panel
 from . import ENABLE_PROFILING   # global flag from __init__.py
+
+try:
+    import polars as pl
+except ImportError:
+    pl = None
 
 warnings.filterwarnings("ignore")
 console = Console()
@@ -22,8 +26,10 @@ def _to_pandas(data):
     """Internal helper – ensures all modules receive pandas DataFrame."""
     if isinstance(data, pd.DataFrame):
         return data
-    elif isinstance(data, pl.DataFrame):
+    elif pl and isinstance(data, pl.DataFrame):
         return data.to_pandas()
+    elif isinstance(data, pd.Series):
+        return data.to_frame()
     else:
         raise TypeError("BizLens: Input must be a pandas or polars DataFrame")
 

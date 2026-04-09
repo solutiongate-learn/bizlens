@@ -12,7 +12,7 @@ import time
 from rich.console import Console
 from rich.panel import Panel
 from . import ENABLE_PROFILING   # global flag from __init__.py
-from . import quality             # required for describe() → quality.completeness_report()
+from .quality import quality      # required for describe() → quality.completeness_report()
 
 try:
     import polars as pl

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bizlens"
-version = "2.2.14"
+version = "2.2.15"
 description = "Educational descriptive analytics + statistical inference + process mining. Rich tables, diagnostic checks, hypothesis testing, and business process analysis for teaching and analysis."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -47,6 +47,7 @@ dependencies = [
     "matplotlib>=3.6.0",
     "seaborn>=0.12.0",
     "plotly>=5.0.0",
+    "networkx>=2.6.0",
 
     # Machine learning (outlier detection)
     "scikit-learn>=1.0.0",

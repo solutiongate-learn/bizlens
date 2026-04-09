@@ -171,7 +171,7 @@ class tables:
 
         for col in summary.index:
             table.add_row(
-                col,
+                str(col),
                 str(int(summary.loc[col, 'count'])),
                 f"{summary.loc[col, 'mean']:.4f}".rstrip('0').rstrip('.'),
                 f"{summary.loc[col, 'std']:.4f}".rstrip('0').rstrip('.'),

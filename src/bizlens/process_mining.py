@@ -381,3 +381,55 @@ class process_mining:
                 duration = time.perf_counter() - start
                 console.print(f"[dim][Profiling] process_mining.transition_matrix completed in {duration:.4f}s[/dim]")
             return pd.DataFrame(), RichTable()
+
+    @staticmethod
+    def petri_net_from_log(event_log: pd.DataFrame, case_id_col: str = 'case_id', activity_col: str = 'activity', show_diagram: bool = False):
+        """Generate Petri net structure from event log."""
+        df = _to_pandas(event_log)
+        transitions = df[activity_col].unique().tolist()
+        places = [f'p{i}' for i in range(len(transitions) + 1)]
+        arcs, new_code_continued = [], []
+        for case in df[case_id_col].unique():
+            case_log = df[df[case_id_col] == case].sort_values('timestamp' if 'timestamp' in df.columns else df.columns[0])
+            activities = case_log[activity_col].tolist()
+            for i in range(len(activities)):
+                arcs.append((places[i], activities[i]))
+                arcs.append((activities[i], places[i + 1]))
+        return {'places': list(set(places)), 'transitions': transitions, 'arcs': list(set(arcs)), 'initial_marking': {places[0]: 1}, 'final_marking': {places[-1]: 1}}
+    
+    @staticmethod
+    def causal_net_from_log(event_log: pd.DataFrame, case_id_col: str = 'case_id', activity_col: str = 'activity', min_support: float = 0.1):
+        """Discover causal net from event log."""
+        df = _to_pandas(event_log)
+        transitions = {}
+        for case in df[case_id_col].unique():
+            case_log = df[df[case_id_col] == case].sort_values('timestamp' if 'timestamp' in df.columns else df.columns[0])
+            activities = case_log[activity_col].tolist()
+            for i in range(len(activities) - 1):
+                pair = (activities[i], activities[i+1])
+                transitions[pair] = transitions.get(pair, 0) + 1
+        total = sum(transitions.values())
+        min_count = max(1, int(min_support * total))
+        causal_edges = {k: v for k, v in transitions.items() if v >= min_count}
+        return {'activities': df[activity_col].unique().tolist(), 'causal_edges': causal_edges, 'total_cases': df[case_id_col].nunique()}
+    
+    @staticmethod
+    def alpha_algorithm(event_log: pd.DataFrame, case_id_col: str = 'case_id', activity_col: str = 'activity'):
+        """Simplified Alpha Algorithm for process discovery."""
+        df = _to_pandas(event_log)
+        T = set(df[activity_col])
+        direct_succession = set()
+        for case in df[case_id_col].unique():
+            case_log = df[df[case_id_col] == case].sort_values('timestamp' if 'timestamp' in df.columns else df.columns[0])
+            activities = case_log[activity_col].tolist()
+            for i in range(len(activities) - 1):
+                direct_succession.add((activities[i], activities[i+1]))
+        causality = set()
+        for a, b in direct_succession:
+            if (b, a) not in direct_succession:
+                causality.add((a, b))
+        all_successors = set([b for a, b in direct_succession])
+        all_predecessors = set([a for a, b in direct_succession])
+        start_activities = T - all_successors
+        end_activities = T - all_predecessors
+        return {'activities': list(T), 'direct_succession': list(direct_succession), 'causality_relations': list(causality), 'start_activities': list(start_activities), 'end_activities': list(end_activities)}

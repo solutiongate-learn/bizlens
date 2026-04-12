@@ -1,5 +1,5 @@
 """
-Setup configuration for BizLens v2.2.0
+Setup configuration for BizLens v2.3.2
 Integrated Analytics Platform — Descriptive · Diagnostic · Predictive ·
 Prescriptive · Simulation · Quality · Project · Text Analytics
 """
@@ -9,14 +9,14 @@ from pathlib import Path
 
 # Long description shown on PyPI project page
 this_directory = Path(__file__).parent
-long_description = (this_directory / "README_FINAL.md").read_text(encoding="utf-8")
+long_description = (this_directory / "README.md").read_text(encoding="utf-8")
 
 setup(
     name="bizlens",
-    version="2.2.3",
+    version="2.3.1",
     author="Sudhanshu Singh",
     author_email="cc9n8y8tqc@privaterelay.appleid.com",
-    description="Integrated Analytics Platform - Descriptive, Diagnostic, and now Advanced Predictive ML with XGBoost & SHAP",
+    description="Comprehensive analytics and ML platform with 13 interactive Jupyter notebooks covering statistics, regression, machine learning, clustering, process mining, time series analysis, and anomaly detection. Dual Pandas/Polars framework support.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/solutiongate-learn/bizlens",
@@ -66,7 +66,7 @@ setup(
         "matplotlib>=3.3.0",
         "seaborn>=0.11.0",
         "scikit-learn>=1.0.0",
-        "statsmodels>=0.13.0",
+        "statsmodels>=0.14.2",
         "PuLP>=2.7.0",
         "networkx>=2.6.0",
         "rich>=12.0.0",

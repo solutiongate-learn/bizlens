@@ -5,7 +5,86 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-04-12
+
+### Added
+- **datasets.py Enhancements**
+  - Fully implemented synthetic process mining dataset generators:
+    - `generate_hr_onboarding_event_log`
+    - `generate_healthcare_event_log`
+    - `generate_manufacturing_event_log`
+    - `generate_tech_support_event_log`
+    - `generate_clean_ecommerce_data`
+- **eda.py Enhancements**
+  - Introduced highly aesthetic visualizations:
+    - `plot_distributions`: Grid-style KDE distributions for numeric variables
+    - `plot_correlation_heatmap`: Annotated triangular correlation matrices
+    - `plot_categorical`: Top-N categorical bar charts
+  - Upgraded `full_report` to utilize the new visual functions effortlessly.
+- **Notebook Additions**
+  - Added new `New_Time_Series_Anomaly.ipynb` educational notebook covering:
+    - Synthetic time series generation
+    - Outlier detection using Isolation Forests
+    - Visual highlighting of anomalies
+
+### Changed
+- Updated `New_Descriptive_Analytics.ipynb` by running the new `eda` toolings under the hood and upgrading standard functionalities.
+
+## [2.2.16] - 2026-04-09
+
+### Fixed
+- **CRITICAL: Catastrophic bug in diagnostic.py**
+  - Removed AI chat response text accidentally embedded as Python code
+  - This text was interfering with module import and functionality
+  - Status: ✅ Resolved
+
+- **Missing methods in diagnostic.py**
+  - Implemented `duplicate_analysis()` - Analyze duplicate rows in datasets
+  - Implemented `data_type_consistency()` - Check type consistency across columns
+  - Implemented `cardinality_analysis()` - Analyze column cardinality and categorization
+  - Status: ✅ All 3 methods fully functional
+
+- **Version string inconsistencies**
+  - All source files were mislabeled as v2.2.14, now corrected to v2.2.16
+  - setup.py version was 2.2.3, now synchronized to 2.2.16
+  - pyproject.toml and setup.py now perfectly synchronized
+  - Status: ✅ All metadata files consistent
+
+### Added
+- **Complete notebook suite with full analysis code**
+  - All 13 notebooks now have working analysis code (no placeholders)
+  - Total: 287 cells, 141 code cells across all notebooks
+  - Every notebook tested and validated for correctness
+  - Notebooks cover: descriptive analytics, inference, process mining, ML, clustering
+
+- **Comprehensive deployment documentation**
+  - `DEPLOYMENT_CHECKLIST_v2.2.16.md` - Step-by-step deployment guide
+  - Release notes with upgrade instructions
+
+### Changed
+- **Version numbering policy**
+  - v2.2.15 was released with critical bugs
+  - v2.2.16 is a hotfix release addressing those bugs
+  - Clear distinction between buggy and fixed versions on PyPI
+
+### Deprecated
+- **v2.2.15** - Contains bugs; users should upgrade to v2.2.16 immediately
+
+### Note
+**For users:** If you installed v2.2.15, please upgrade immediately:
+```bash
+pip install --upgrade bizlens==2.2.16
+```
+
+**Why this hotfix release:** A catastrophic bug in `diagnostic.py` (embedded AI chat text) and 3 missing methods made v2.2.15 unsuitable for release. This hotfix (v2.2.16) resolves all issues and completes the notebook suite.
+
+---
+
 ## [2.2.15] - 2026-04-09
+
+### IMPORTANT: This version contains critical bugs. Use v2.2.16 instead.
+
+### Added
 
 ### Added
 - **Process Mining Enhancements**

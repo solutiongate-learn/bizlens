@@ -1,0 +1,245 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║                    UNLOCK NOTEBOOKS - QUICK FIX GUIDE                        ║
+║                                                                              ║
+║  Affected Files:                                                            ║
+║    • New_Descriptive_Analytics.ipynb                                        ║
+║    • New_Master_Process_Mining.ipynb                                        ║
+║    • New_Time_Series_Anomaly.ipynb                                          ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+STEP 1: CLOSE ANY OPEN JUPYTER NOTEBOOKS (2 MINUTES)
+═══════════════════════════════════════════════════════════════════════════════
+
+This is the most common cause of file locks.
+
+macOS/Linux Terminal:
+─────────────────────
+$ jupyter notebook stop
+
+OR if that doesn't work:
+$ pkill -f jupyter
+
+Windows PowerShell:
+──────────────────
+> Stop-Process -Name "jupyter*"
+
+Then wait 30 seconds for system to release locks.
+
+
+STEP 2: CLOSE CODE EDITORS (1 MINUTE)
+═══════════════════════════════════════════════════════════════════════════════
+
+Check if these applications have the notebooks open:
+  ☐ VS Code
+  ☐ PyCharm / JetBrains IDEs
+  ☐ Sublime Text
+  ☐ Text editors
+  ☐ Finder/File Explorer (might be previewing)
+
+Close any that have these files open.
+
+
+STEP 3: VERIFY FILES ARE ACCESSIBLE (2 MINUTES)
+═══════════════════════════════════════════════════════════════════════════════
+
+Run this Python script:
+
+$ python3 << 'EOF'
+import json
+
+notebooks = [
+    "notebooks/New_Descriptive_Analytics.ipynb",
+    "notebooks/New_Master_Process_Mining.ipynb",
+    "notebooks/New_Time_Series_Anomaly.ipynb"
+]
+
+print("Testing notebook access...\n")
+
+for nb in notebooks:
+    try:
+        with open(nb, 'r') as f:
+            data = json.load(f)
+            cells = len(data.get('cells', []))
+            code_cells = len([c for c in data.get('cells', []) if c.get('cell_type') == 'code'])
+            print(f"✓ {nb.split('/')[-1]}")
+            print(f"  Cells: {code_cells} code + {cells - code_cells} markdown")
+    except Exception as e:
+        print(f"✗ {nb.split('/')[-1]}: {e}")
+
+print("\nDone!")
+EOF
+
+
+STEP 4: IF STILL LOCKED - FORCE RESTORE FROM GIT
+═══════════════════════════════════════════════════════════════════════════════
+
+If the above test still fails:
+
+$ cd /path/to/bizlens
+
+$ rm -f .git/index.lock
+
+$ rm -f notebooks/New_Descriptive_Analytics.ipynb \
+        notebooks/New_Master_Process_Mining.ipynb \
+        notebooks/New_Time_Series_Anomaly.ipynb
+
+$ git checkout HEAD -- notebooks/New_Descriptive_Analytics.ipynb
+$ git checkout HEAD -- notebooks/New_Master_Process_Mining.ipynb
+$ git checkout HEAD -- notebooks/New_Time_Series_Anomaly.ipynb
+
+Then re-run Step 3 to verify.
+
+
+STEP 5: IF STILL LOCKED - SYSTEM RESTART (5 MINUTES)
+═══════════════════════════════════════════════════════════════════════════════
+
+If steps 1-4 don't work, restart your computer:
+
+macOS:
+  Apple menu → Restart
+
+Windows:
+  Start → Power → Restart
+
+Linux:
+  $ sudo reboot
+
+After restart, the system file locks will be cleared.
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+WHAT'S CAUSING THE LOCKS?
+─────────────────────────
+
+✗ COMMON CAUSES:
+  • Jupyter notebook still running
+  • File open in editor/IDE
+  • Cloud sync service (Dropbox, OneDrive, iCloud)
+  • System file descriptor issue
+  • Previous crash left locks
+
+✓ HOW TO VERIFY THEY'RE UNLOCKED:
+  Test script in Step 3 should show ✓ for all three files
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+EXPECTED RESULTS WHEN UNLOCKED
+─────────────────────────────
+
+✓ New_Descriptive_Analytics.ipynb
+  Cells: X code + Y markdown
+
+✓ New_Master_Process_Mining.ipynb
+  Cells: X code + Y markdown
+
+✓ New_Time_Series_Anomaly.ipynb
+  Cells: X code + Y markdown
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+COMPLETE VERIFICATION AFTER UNLOCK
+───────────────────────────────────
+
+Once all three show ✓, run this comprehensive test:
+
+python3 << 'EOF'
+import json
+
+notebooks = [
+    "notebooks/New_Descriptive_Analytics.ipynb",
+    "notebooks/New_Master_Process_Mining.ipynb",
+    "notebooks/New_Time_Series_Anomaly.ipynb"
+]
+
+print("=" * 80)
+print("COMPREHENSIVE NOTEBOOK VERIFICATION")
+print("=" * 80)
+print()
+
+for nb_path in notebooks:
+    print(f"Notebook: {nb_path.split('/')[-1]}")
+
+    try:
+        with open(nb_path, 'r') as f:
+            nb_data = json.load(f)
+
+        cells = nb_data.get('cells', [])
+        code_cells = [c for c in cells if c.get('cell_type') == 'code']
+        markdown_cells = [c for c in cells if c.get('cell_type') == 'markdown']
+
+        # Check for frameworks
+        all_source = ""
+        for cell in code_cells:
+            source = cell.get('source', [])
+            if isinstance(source, list):
+                all_source += "\n".join(source)
+            else:
+                all_source += source
+
+        has_pandas = 'pandas' in all_source.lower() or 'pd.' in all_source
+        has_polars = 'polars' in all_source.lower() or 'pl.' in all_source
+        has_bizlens = 'bizlens' in all_source or 'import bizlens' in all_source
+
+        print(f"  Status: ✅ ACCESSIBLE")
+        print(f"  Cells: {len(code_cells)} code + {len(markdown_cells)} markdown")
+        print(f"  {'  ✓' if has_pandas else '  ✗'} Pandas support")
+        print(f"  {'  ✓' if has_polars else '  ✗'} Polars support")
+        print(f"  {'  ✓' if has_bizlens else '  ✗'} BizLens integration")
+        print(f"  Result: {'✅ READY FOR RELEASE' if has_bizlens else '⚠️ NEEDS REVIEW'}")
+
+    except Exception as e:
+        print(f"  Status: ❌ NOT ACCESSIBLE")
+        print(f"  Error: {type(e).__name__}: {str(e)[:50]}")
+
+    print()
+
+print("=" * 80)
+
+EOF
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+AFTER SUCCESSFUL UNLOCK
+───────────────────────
+
+Once all 3 notebooks are unlocked and verified:
+
+1. ✓ You now have 13/13 notebooks verified
+2. ✓ Ready to proceed with v2.2.17 release
+3. ✓ All documentation is complete
+4. ✓ Run: bash UPDATE_VERSION_TO_2.2.17.sh
+5. ✓ Build and deploy to PyPI & GitHub
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+ESTIMATED TIME TO UNLOCK: 5-15 MINUTES
+
+Step 1 (Close Jupyter):  2 min  ← START HERE
+Step 2 (Close editors):  1 min
+Step 3 (Test):          2 min
+Step 4 (Git restore):   5 min  ← If needed
+Step 5 (Restart):       5 min  ← Last resort
+
+─────────────────────────────────
+
+For detailed solutions and troubleshooting, see:
+→ NOTEBOOK_UNLOCK_SOLUTIONS.md
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Questions? Problems? See NOTEBOOK_UNLOCK_SOLUTIONS.md for:
+  • Detailed explanations
+  • System-specific commands
+  • Alternative solutions
+  • Prevention tips
+
+═══════════════════════════════════════════════════════════════════════════════

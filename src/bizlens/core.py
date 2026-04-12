@@ -1,6 +1,5 @@
 """
-BizLens v2.2.14 — Descriptive Analytics Core
-Enhanced: Full pandas/polars compatibility + built-in performance profiling.
+BizLens v2.3.2 — Descriptive Analytics Core
 """
 
 import warnings
@@ -11,40 +10,22 @@ import seaborn as sns
 import time
 from rich.console import Console
 from rich.panel import Panel
-from . import ENABLE_PROFILING   # global flag from __init__.py
-from .quality import quality      # required for describe() → quality.completeness_report()
-
-try:
-    import polars as pl
-except ImportError:
-    pl = None
+from . import ENABLE_PROFILING
+from .quality import quality
+from .utils import to_pandas
 
 warnings.filterwarnings("ignore")
 console = Console()
 
 
-def _to_pandas(data):
-    """Internal helper – ensures all modules receive pandas DataFrame."""
-    if isinstance(data, pd.DataFrame):
-        return data
-    elif pl and isinstance(data, pl.DataFrame):
-        return data.to_pandas()
-    elif isinstance(data, pd.Series):
-        return data.to_frame()
-    else:
-        raise TypeError("BizLens: Input must be a pandas or polars DataFrame")
-
-
 def describe(data, include_plots: bool = True, show_timing: bool = False):
-    """Comprehensive descriptive analytics with smart event log detection.
-    Now supports both pandas and polars. Timing enabled via bl.set_profiling(True).
-    """
+    """Comprehensive descriptive analytics with smart event log detection."""
     if ENABLE_PROFILING or show_timing:
         start_total = time.perf_counter()
 
-    console.print(Panel("[bold cyan]BizLens Descriptive Analytics v2.2.14[/bold cyan]", style="bold blue"))
+    console.print(Panel("[bold cyan]BizLens Descriptive Analytics v2.2.16[/bold cyan]", style="bold blue"))
 
-    df = _to_pandas(data)
+    df = to_pandas(data)
 
     # Flexible Event Log Detection
     col_lower = {c.lower(): c for c in df.columns}
@@ -82,7 +63,7 @@ def describe(data, include_plots: bool = True, show_timing: bool = False):
         console.print(f"• Cases: {num_cases:,} | Unique Activities: {unique_acts}")
         console.print(f"• Total Events: {total_events:,} | Time Span: {time_span}")
 
-    # === Run other BizLens modules (all features preserved) ===
+    # Quality Report
     if ENABLE_PROFILING or show_timing:
         start_q = time.perf_counter()
     quality.completeness_report(df)
@@ -103,13 +84,10 @@ def describe(data, include_plots: bool = True, show_timing: bool = False):
             plt.ylabel("Frequency")
             plt.show()
 
-    # === Final profiling summary (only if enabled) ===
     if ENABLE_PROFILING or show_timing:
         total_duration = time.perf_counter() - start_total
         console.print(Panel(
-            f"[bold green]✅ Analysis Complete in {total_duration:.4f} seconds[/bold green]\n"
-            f"• Data converted to pandas: {_to_pandas.__code__.co_filename}\n"
-            f"• All modules (quality, diagnostic, inference, tables) now fully compatible",
+            f"[bold green]✅ Analysis Complete in {total_duration:.4f} seconds[/bold green]",
             style="green"
         ))
 
@@ -124,7 +102,7 @@ class BizDesc:
         return describe(self.data, include_plots=include_plots, show_timing=show_timing)
 
 
-# Backward compatibility (unchanged)
+# Backward compatibility
 def generate_sample_data(n_rows: int = 1000, seed: int = 42):
     from .datasets import generate_sample_data as ds_generate
     return ds_generate(n_rows, seed)

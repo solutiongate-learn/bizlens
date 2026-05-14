@@ -1,104 +1,60 @@
 [build-system]
-requires = ["setuptools>=45", "wheel"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "bizlens"
-version = "2.3.2"
-description = "BizLens: Complete analytics platform with 13 interactive Jupyter notebooks covering descriptive analytics, statistical inference, regression, machine learning, clustering, process mining, and time series analysis. Built-in Rich tables, dual Pandas/Polars support, and production-ready code examples."
+version = "2.3.3"
+description = "Integrated Analytics Platform - Descriptive, Diagnostic & Predictive Analytics with Sample vs Population Distinction"
 readme = "README.md"
-requires-python = ">=3.9"
 license = {text = "MIT"}
 authors = [
-    {name = "Sudhanshu Singh", email = "cc9n8y8tqc@privaterelay.appleid.com"}
+    {name = "Sudhanshu Singh", email = "sudhanshu@solutiongate.in"}
+]
+maintainers = [
+    {name = "Sudhanshu Singh", email = "sudhanshu@solutiongate.in"}
 ]
 keywords = [
-    "analytics", "statistics", "education", "business-intelligence",
-    "descriptive-analytics", "eda", "data-visualization", "outlier-detection",
-    "normality-test", "synthetic-data", "process-mining", "teaching",
-    "sample-vs-population", "skewness", "data-science"
+    "business analytics", "statistics", "process mining", "machine learning",
+    "data analysis", "descriptive analytics", "predictive analytics", "rich tables"
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
-    "Intended Audience :: Education",
     "Intended Audience :: Science/Research",
-    "Intended Audience :: Developers",
-    "Topic :: Scientific/Engineering :: Mathematics",
-    "Topic :: Scientific/Engineering :: Information Analysis",
-    "Topic :: Education",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Scientific/Engineering :: Visualization",
 ]
-
+requires-python = ">=3.9"
 dependencies = [
-    # Core data manipulation
-    "numpy>=1.21.0",
-    "pandas>=1.5.0",
-
-    # Statistical analysis
-    "scipy>=1.9.0",
-    "statsmodels>=0.14.2",
-
-    # Visualization
-    "matplotlib>=3.6.0",
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
+    "statsmodels>=0.14.0",
+    "matplotlib>=3.7.0",
     "seaborn>=0.12.0",
-    "plotly>=5.0.0",
-    "networkx>=2.6.0",
-
-    # Machine learning (outlier detection)
-    "scikit-learn>=1.0.0",
-
-    # UI
+    "plotly>=5.15.0",
+    "scikit-learn>=1.3.0",
     "rich>=13.0.0",
-]
-
-[project.optional-dependencies]
-# Jupyter/Colab support for interactive use
-jupyter = [
-    "jupyter>=1.0.0",
-    "ipython>=7.30.0",
-    "ipykernel>=6.0.0",
-]
-
-# Additional statistical tools
-stats-advanced = [
-    "phik>=0.11.0",
-]
-
-# Advanced process mining (PM4Py integration)
-process-mining = ["pm4py>=2.7.0"]
-
-# Full installation with all extras
-full = [
-    "jupyter>=1.0.0",
-    "ipython>=7.30.0",
-    "ipykernel>=6.0.0",
-    "phik>=0.11.0",
-    "pm4py>=2.7.0",
-]
-
-# Development tools
-dev = [
-    "pytest>=7.0",
-    "pytest-cov>=4.0",
-    "black>=23.0",
-    "flake8>=6.0",
-    "mypy>=0.990",
+    "polars>=0.20.0",
+    "networkx>=2.8.0",
 ]
 
 [project.urls]
 Homepage = "https://github.com/solutiongate-learn/bizlens"
 Documentation = "https://github.com/solutiongate-learn/bizlens#readme"
 Repository = "https://github.com/solutiongate-learn/bizlens"
-"Bug Tracker" = "https://github.com/solutiongate-learn/bizlens/issues"
-PyPI = "https://pypi.org/project/bizlens/"
-
-[tool.setuptools]
-package-dir = {"" = "src"}
+Issues = "https://github.com/solutiongate-learn/bizlens/issues"
+Changelog = "https://github.com/solutiongate-learn/bizlens/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+bizlens = ["*.csv", "*.json"]

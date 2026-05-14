@@ -1,8 +1,11 @@
 """
-BizLens v2.3.2
+BizLens - Integrated Analytics Platform
+Version 2.3.3
 """
 
-__version__ = "2.3.2"
+__version__ = "2.3.3"
+__author__ = "Sudhanshu Singh"
+__email__ = "sudhanshu@solutiongate.in"
 
 ENABLE_PROFILING = False
 
@@ -11,25 +14,11 @@ def set_profiling(enabled: bool = True):
     ENABLE_PROFILING = enabled
     from rich.console import Console
     console = Console()
-    console.print(f"[bold green]🔍 Profiling {'ENABLED' if enabled else 'DISABLED'}[/bold green]")
+    status = "enabled" if enabled else "disabled"
+    console.print(f"[bold green]BizLens profiling {status}[/bold green]")
 
-from .utils import to_pandas
 from .core import describe, BizDesc
-from .tables import tables
-from .diagnostic import diagnostic
-from .inference import inference
-from .process_mining import process_mining
-from .quality import quality
-from .datasets import load_dataset, list_datasets, generate_clean_ecommerce_data
-from .preprocess import preprocess
-from .eda import eda
-from .deploy import deploy, packages
+from . import tables, diagnostic, quality, inference, process_mining, eda, datasets, preprocess
+from .datasets import load_dataset, list_datasets, generate_clean_ecommerce_data, generate_hr_onboarding_event_log, generate_healthcare_event_log
 
-__all__ = [
-    "__version__", "set_profiling", "to_pandas",
-    "describe", "BizDesc",
-    "tables", "diagnostic", "quality", "inference", "process_mining",
-    "load_dataset", "list_datasets", "generate_clean_ecommerce_data",
-    "preprocess", "eda",
-    "deploy", "packages",
-]
+__all__ = ["__version__", "describe", "BizDesc", "tables", "diagnostic", "quality", "inference", "process_mining", "eda", "datasets", "preprocess", "load_dataset", "list_datasets", "set_profiling"]

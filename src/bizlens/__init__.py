@@ -1,9 +1,9 @@
 """
 BizLens - Integrated Analytics Platform
-Version 2.3.3
+Version 2.3.4
 """
 
-__version__ = "2.3.3"
+__version__ = "2.3.4"
 __author__ = "Sudhanshu Singh"
 __email__ = "sudhanshu@solutiongate.in"
 
